@@ -40,11 +40,13 @@ export default function Sidebar({ items, role }: SidebarProps) {
   const router = useRouter();
   const [userName, setUserName] = useState('');
   const [userAvatar, setUserAvatar] = useState('');
+  const [avatarError, setAvatarError] = useState(false);
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
       setUserName(localStorage.getItem('user_name') || '');
-      setUserAvatar(localStorage.getItem('user_avatar') || '');
+      const stored = localStorage.getItem('user_avatar') || '';
+      setUserAvatar(stored !== 'default.png' ? stored : '');
     }, 0);
     return () => window.clearTimeout(timeout);
   }, []);
@@ -72,8 +74,8 @@ export default function Sidebar({ items, role }: SidebarProps) {
           <span className="text-xl font-black text-gray-900 tracking-tight">صنعة</span>
         </Link>
         <div className="flex flex-col items-center text-center">
-          {userAvatar ? (
-            <img src={userAvatar} alt="Profile" className="w-16 h-16 rounded-2xl object-cover shadow-sm mb-3 border border-gray-100" />
+          {userAvatar && !avatarError ? (
+            <img src={userAvatar} alt="Profile" className="w-16 h-16 rounded-2xl object-cover shadow-sm mb-3 border border-gray-100" onError={() => setAvatarError(true)} />
           ) : (
             <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${getAvatarColor(userName)} flex items-center justify-center text-white text-xl font-bold shadow-sm mb-3`}>
               {getInitials(userName)}

@@ -57,7 +57,8 @@ export default function SettingsPage() {
         setEmail(user.email || '');
         setPhone(user.phone || '');
         setAddress(user.location?.address || '');
-        setAvatar(user.avatar || '');
+        const av = user.avatar || '';
+        setAvatar(av !== 'default.png' ? av : '');
         localStorage.setItem('user_id', user._id || '');
       }
     }).catch(() => {}).finally(() => setLoading(false));
@@ -75,7 +76,7 @@ export default function SettingsPage() {
       });
       if (res.data.status === 'success') {
         localStorage.setItem('user_name', name);
-        if (avatar) localStorage.setItem('user_avatar', avatar);
+        localStorage.setItem('user_avatar', avatar || '');
         toast.success('تم حفظ التغييرات بنجاح');
       }
     } catch (err: unknown) {
