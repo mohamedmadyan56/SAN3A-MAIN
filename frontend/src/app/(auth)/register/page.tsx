@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { API_BASE, extractTextContent } from '@/lib/api';
 
 export default function RegisterPage() {
   const navigate = useRouter();
@@ -32,7 +31,7 @@ export default function RegisterPage() {
 
     try {
       const response = await axios.post(
-        `${API_BASE}/users/signup`,
+        'http://localhost:5000/api/v1/users/signup',
         { name, email, phone, password, role }
       );
 
@@ -47,8 +46,10 @@ export default function RegisterPage() {
         localStorage.setItem('user_id', response.data.data?.user?._id || '');
         navigate.push('/');
       }
-    } catch (err: unknown) {
-      const msg = extractTextContent(err, 'حدث خطأ أثناء إنشاء الحساب، يرجى المحاولة مرة أخرى');
+    } catch (err: any) {
+      const msg =
+        err.response?.data?.message ||
+        'حدث خطأ أثناء إنشاء الحساب، يرجى المحاولة مرة أخرى';
       setErrorMessage(msg);
     } finally {
       setIsLoading(false);
@@ -56,10 +57,61 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#eef6ef] flex items-center justify-center p-4" dir="rtl">
-        <div className="w-full max-w-md rounded-2xl shadow-sm border border-gray-100 p-8 bg-white">
+    <div className="min-h-screen flex flex-row-reverse bg-white">
 
-          {/* اللوجو فوق الفورم */}
+      <div className="hidden lg:flex w-1/2 bg-gradient-to-b from-[#071C35] to-[#02111F] text-white relative">
+        <div className="w-full flex flex-col justify-center px-16">
+
+          <div className="absolute top-8 right-8">
+            <Image
+              src="/logo.png"
+              alt="San3a Logo"
+              width={140}
+              height={45}
+              priority
+              className="object-contain"
+            />
+          </div>
+
+          <h1 className="text-6xl font-black leading-[1.1] tracking-tight mb-6">
+            انضم إلى مجتمعنا من<br />
+            المحترفين الموثوقين<br />
+            وأصحاب المنازل السعداء
+          </h1>
+
+          <p className="text-gray-300 text-lg font-light leading-[1.9] mb-12">
+            المنصة الأكثر موثوقية لخدمات المنازل الذكية الاحترافية.<br />
+            آمنة، موثوقة، وسلسة.
+          </p>
+
+          <div className="space-y-6">
+            <div className="flex items-center gap-3 justify-end">
+              <span>شبكة محترفين موثقة</span>
+              <div className="w-8 h-8 rounded-full border border-green-400 flex items-center justify-center text-green-400">
+                ✓
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 justify-end">
+              <span>حماية دفع آمنة</span>
+              <div className="w-8 h-8 rounded-full border border-green-400 flex items-center justify-center text-green-400">
+                🛡
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 justify-end">
+              <span>دعم فني متخصص على مدار الساعة</span>
+              <div className="w-8 h-8 rounded-full border border-green-400 flex items-center justify-center text-green-400">
+                🎧
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+        <div className="w-full max-w-xl" dir="rtl">
+
           <div className="flex justify-center mb-8">
             <Image
               src="/logo.png"
@@ -72,13 +124,12 @@ export default function RegisterPage() {
           </div>
 
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            <h2 className="text-4xl font-black text-gray-900 mb-2 tracking-tight">
               إنشاء حساب
             </h2>
             <p className="text-gray-500">ابدأ رحلتك مع صنعة اليوم.</p>
           </div>
 
-          {/* رسائل التنبيه والخطأ */}
           {errorMessage && (
             <div className="bg-red-50 border border-red-200 text-red-600 p-4 rounded-xl mb-4 text-sm font-medium">
               {errorMessage}
@@ -91,14 +142,13 @@ export default function RegisterPage() {
             </div>
           )}
 
-          {/* اختيار نوع الحساب */}
           <div className="grid grid-cols-2 gap-3 mb-8">
             <button
               type="button"
               onClick={() => setRole('customer')}
                 className={`py-4 rounded-xl font-bold transition-all tracking-tight ${
                   role === 'customer'
-                    ? 'bg-[#0f5132] text-white shadow-md'
+                    ? 'bg-[#007A4D] text-white shadow-md'
                     : 'bg-[#EEF5F1] text-gray-700 hover:bg-gray-200'
                 }`}
               >
@@ -110,7 +160,7 @@ export default function RegisterPage() {
                 onClick={() => setRole('craftsman')}
                 className={`py-4 rounded-xl font-bold transition-all tracking-tight ${
                   role === 'craftsman'
-                    ? 'bg-[#0f5132] text-white shadow-md'
+                    ? 'bg-[#007A4D] text-white shadow-md'
                     : 'bg-[#EEF5F1] text-gray-700 hover:bg-gray-200'
                 }`}
               >
@@ -118,7 +168,6 @@ export default function RegisterPage() {
               </button>
           </div>
 
-          {/* فورم إدخال البيانات */}
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div>
               <label className="block mb-2 text-gray-700 font-medium">
@@ -131,7 +180,7 @@ export default function RegisterPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="أدخل اسمك الكامل"
-                className="border border-gray-200 rounded-xl px-4 py-3 text-right w-full focus:border-[#0f5132] focus:ring-1 focus:ring-[#0f5132] outline-none"
+                className="w-full h-14 rounded-xl border border-gray-300 px-4 focus:outline-none focus:ring-2 focus:ring-[#007A4D] text-gray-900"
               />
             </div>
 
@@ -146,7 +195,7 @@ export default function RegisterPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className="border border-gray-200 rounded-xl px-4 py-3 text-right w-full focus:border-[#0f5132] focus:ring-1 focus:ring-[#0f5132] outline-none"
+                  className="w-full h-14 rounded-xl border border-gray-300 px-4 focus:outline-none focus:ring-2 focus:ring-[#007A4D] text-gray-900"
                 />
               </div>
 
@@ -162,7 +211,7 @@ export default function RegisterPage() {
                   placeholder="+20 100 000 0000"
                   pattern="^\+?[0-9\s]{8,15}$"
                   title="يرجى إدخال رقم هاتف صحيح (أرقام فقط، يمكن أن يبدأ بـ +)"
-                  className="border border-gray-200 rounded-xl px-4 py-3 text-right w-full focus:border-[#0f5132] focus:ring-1 focus:ring-[#0f5132] outline-none"
+                  className="w-full h-14 rounded-xl border border-gray-300 px-4 focus:outline-none focus:ring-2 focus:ring-[#007A4D] text-gray-900"
                 />
               </div>
             </div>
@@ -178,17 +227,16 @@ export default function RegisterPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="8 أحرف على الأقل"
-                className="border border-gray-200 rounded-xl px-4 py-3 text-right w-full focus:border-[#0f5132] focus:ring-1 focus:ring-[#0f5132] outline-none"
+                className="w-full h-14 rounded-xl border border-gray-300 px-4 focus:outline-none focus:ring-2 focus:ring-[#007A4D] text-gray-900"
               />
             </div>
 
-            {/* شروط وسياسة الخصوصية */}
             <div className="flex items-center gap-3 justify-start select-none">
               <input
                 id="terms"
                 type="checkbox"
                 required
-                className="w-5 h-5 accent-[#0f5132] cursor-pointer"
+                className="w-5 h-5 accent-[#007A4D] cursor-pointer"
               />
               <label htmlFor="terms" className="text-gray-700 cursor-pointer text-sm font-medium">
                 أوافق على الشروط وسياسة الخصوصية
@@ -198,7 +246,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-[#0f5132] text-white rounded-full font-bold hover:bg-[#0c3f27] transition-colors py-3 disabled:opacity-60"
+              className="w-full bg-[#007A4D] hover:bg-[#006341] disabled:bg-gray-400 transition text-white py-4 rounded-xl text-lg font-medium"
             >
               {isLoading ? 'جاري إنشاء الحساب...' : 'إنشاء الحساب'}
             </button>
@@ -224,6 +272,7 @@ export default function RegisterPage() {
             </button>
           </div>
         </div>
+      </div>
     </div>
   );
 }

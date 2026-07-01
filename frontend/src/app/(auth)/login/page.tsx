@@ -5,7 +5,6 @@ import axios from 'axios';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
-import { API_BASE, extractTextContent } from '@/lib/api';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -23,12 +22,11 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
 
-    // تشغيل الـ Toast اللودينج الاحترافي
     const loginToast = toast.loading('جاري التحقق من البيانات...');
 
     try {
       const response = await axios.post(
-        `${API_BASE}/users/login`,
+        'http://localhost:5000/api/v1/users/login',
         { email, password }
       );
 
@@ -39,19 +37,16 @@ export default function LoginPage() {
         localStorage.setItem('user_token', token);
         localStorage.setItem('token', token);
 
-        // تخزين بيانات الجلسة في المتصفح
         localStorage.setItem('user_token', token);
         localStorage.setItem('user_role', userRole);
         localStorage.setItem('user_name', data?.user?.name || '');
         localStorage.setItem('user_avatar', data?.user?.avatar || '');
         localStorage.setItem('user_id', data?.user?._id || '');
 
-        // تحويل الـ Toast لـ النجاح
         toast.success(`مرحبًا بعودتك يا ${data?.user?.name || ''} 🎉`, {
           id: loginToast,
         });
 
-        // التوجيه الذكي للمستخدم بناءً على الـ Role
         setTimeout(() => {
           if (userRole === 'craftsman') {
             router.push('/dashboard/craftsman');
@@ -62,10 +57,11 @@ export default function LoginPage() {
           }
         }, 800);
       }
-    } catch (err: unknown) {
-      const msg = extractTextContent(err, 'بريد إلكتروني أو كلمة مرور غير صحيحة، تأكد وحاول مجدداً');
+    } catch (err: any) {
+      const msg =
+        err.response?.data?.message ||
+        'بريد إلكتروني أو كلمة مرور غير صحيحة، تأكد وحاول مجدداً';
       
-      // تحويل نفس الـ Toast لـ خطأ
       toast.error(msg, {
         id: loginToast,
       });
@@ -75,10 +71,59 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#eef6ef] flex items-center justify-center p-4" dir="rtl">
-        <div className="w-full max-w-md rounded-2xl shadow-sm border border-gray-100 p-8 bg-white">
+    <div className="min-h-screen flex flex-row-reverse bg-white">
 
-          {/* اللوجو فوق الفورم */}
+      <div className="hidden lg:flex w-1/2 bg-gradient-to-b from-[#071C35] to-[#02111F] text-white relative">
+        <div className="w-full flex flex-col justify-center px-16">
+
+          <div className="absolute top-8 right-8">
+            <Image
+              src="/logo.png"
+              alt="Logo"
+              width={140}
+              height={45}
+              priority
+              className="object-contain"
+            />
+          </div>
+
+          <h1 className="text-5xl font-black leading-[1.15] tracking-tight mb-6">
+            مرحبًا بعودتك<br />
+            إلى منصة صنعة
+          </h1>
+
+          <p className="text-gray-300 text-lg font-light leading-[1.9] mb-12">
+            سجل الدخول للوصول إلى حسابك وإدارة خدماتك بسهولة.
+          </p>
+
+          <div className="space-y-6">
+            <div className="flex items-center gap-3 justify-end">
+              <span>تجربة استخدام سريعة</span>
+              <div className="w-8 h-8 rounded-full border border-green-400 flex items-center justify-center text-green-400">
+                ✓
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 justify-end">
+              <span>حساب آمن بالكامل</span>
+              <div className="w-8 h-8 rounded-full border border-green-400 flex items-center justify-center text-green-400">
+                🛡
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 justify-end">
+              <span>دعم مستمر 24/7</span>
+              <div className="w-8 h-8 rounded-full border border-green-400 flex items-center justify-center text-green-400">
+                🎧
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+        <div className="w-full max-w-xl" dir="rtl">
+
           <div className="flex justify-center mb-8">
             <Image
               src="/logo.png"
@@ -91,13 +136,12 @@ export default function LoginPage() {
           </div>
 
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            <h2 className="text-4xl font-black text-gray-900 mb-2 tracking-tight">
               تسجيل الدخول
             </h2>
             <p className="text-gray-500">أدخل بياناتك للمتابعة</p>
           </div>
 
-          {/* الفورم */}
           <form onSubmit={handleSubmit} className="space-y-5">
 
             <div>
@@ -110,7 +154,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com"
-                className="border border-gray-200 rounded-xl px-4 py-3 text-right w-full focus:border-[#0f5132] focus:ring-1 focus:ring-[#0f5132] outline-none"
+                className="w-full h-14 rounded-xl border border-gray-300 px-4 focus:outline-none focus:ring-2 focus:ring-[#007A4D] text-gray-900"
               />
             </div>
 
@@ -124,20 +168,19 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="border border-gray-200 rounded-xl px-4 py-3 text-right w-full focus:border-[#0f5132] focus:ring-1 focus:ring-[#0f5132] outline-none"
+                className="w-full h-14 rounded-xl border border-gray-300 px-4 focus:outline-none focus:ring-2 focus:ring-[#007A4D] text-gray-900"
               />
             </div>
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-[#0f5132] text-white rounded-full font-bold hover:bg-[#0c3f27] transition-colors py-3 disabled:opacity-60"
+              className="w-full bg-[#007A4D] hover:bg-[#006341] disabled:bg-gray-400 transition text-white py-4 rounded-xl text-lg font-medium"
             >
               {isLoading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}
             </button>
           </form>
 
-          {/* الروابط السفلية */}
           <div className="text-center mt-8">
             <span className="text-gray-500">ليس لديك حساب؟</span>
             <button
@@ -150,11 +193,12 @@ export default function LoginPage() {
           </div>
 
           <div className="flex justify-center gap-6 mt-12 text-lg">
-            <button className="text-[#0f5132] font-medium">العربية</button>
+            <button className="text-[#007A4D] font-medium">العربية</button>
             <button className="text-gray-500">English</button>
           </div>
 
         </div>
+      </div>
     </div>
   );
 }
