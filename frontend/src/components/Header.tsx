@@ -8,12 +8,14 @@ export default function Header() {
   const router = useRouter();
   const [userName, setUserName] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setUserName(localStorage.getItem('user_name'));
     setUserRole(localStorage.getItem('user_role'));
+    setUserId(localStorage.getItem('user_id'));
     setMounted(true);
   }, []);
 
@@ -73,6 +75,14 @@ export default function Header() {
                 >
                   {userName}
                 </Link>
+                {userId && (
+                  <Link
+                    href={`/profile/${userId}`}
+                    className="text-sm text-gray-500 hover:text-[#0f5132] transition-colors"
+                  >
+                    الملف الشخصي
+                  </Link>
+                )}
                 <button
                   onClick={handleLogout}
                   className="text-sm text-gray-400 hover:text-red-500 transition-colors"
@@ -126,6 +136,7 @@ export default function Header() {
             {userName ? (
               <>
                 <Link href={dashboardLink || '/'} onClick={() => setMenuOpen(false)} className="block px-4 py-3 rounded-xl text-sm font-bold text-[#0f5132] hover:bg-gray-50 transition-colors">{userName}</Link>
+                {userId && <Link href={`/profile/${userId}`} onClick={() => setMenuOpen(false)} className="block px-4 py-3 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">الملف الشخصي</Link>}
                 <button onClick={() => { handleLogout(); setMenuOpen(false); }} className="block w-full text-right px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-colors">تسجيل الخروج</button>
               </>
             ) : (

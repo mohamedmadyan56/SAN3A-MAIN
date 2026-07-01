@@ -54,6 +54,7 @@ export default function SettingsPage() {
         setPhone(user.phone || '');
         setAddress(user.location?.address || '');
         setAvatar(user.avatar || '');
+        localStorage.setItem('user_id', user._id || '');
       }
     }).catch(() => {}).finally(() => setLoading(false));
   }, []);
