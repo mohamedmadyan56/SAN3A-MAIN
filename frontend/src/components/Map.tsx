@@ -17,6 +17,7 @@ interface CraftsmanMarker {
   _id: string;
   name: string;
   rating: number;
+  isAvailable?: boolean;
   avgResponseTimeSeconds: number | null;
   location: {
     coordinates: [number, number];
@@ -25,15 +26,23 @@ interface CraftsmanMarker {
 }
 
 const fallbackMarkers = [
-  { _id: '1', name: 'أحمد - كهربائي', rating: 4.8, avgResponseTimeSeconds: 45, location: { coordinates: [30.0444, 31.2357] as [number, number] } },
-  { _id: '2', name: 'محمد - سباك', rating: 4.7, avgResponseTimeSeconds: 60, location: { coordinates: [30.0500, 31.2400] as [number, number] } },
-  { _id: '3', name: 'علي - نجار', rating: 4.9, avgResponseTimeSeconds: 30, location: { coordinates: [30.0380, 31.2300] as [number, number] } },
-  { _id: '4', name: 'محمود - دهان', rating: 4.6, avgResponseTimeSeconds: 75, location: { coordinates: [30.0560, 31.2260] as [number, number] } },
+  { _id: '1', name: 'أحمد - كهربائي', rating: 4.8, isAvailable: true, avgResponseTimeSeconds: 45, location: { coordinates: [30.0444, 31.2357] as [number, number] } },
+  { _id: '2', name: 'محمد - سباك', rating: 4.7, isAvailable: true, avgResponseTimeSeconds: 60, location: { coordinates: [30.0500, 31.2400] as [number, number] } },
+  { _id: '3', name: 'علي - نجار', rating: 4.9, isAvailable: false, avgResponseTimeSeconds: 30, location: { coordinates: [30.0380, 31.2300] as [number, number] } },
+  { _id: '4', name: 'محمود - دهان', rating: 4.6, isAvailable: false, avgResponseTimeSeconds: 75, location: { coordinates: [30.0560, 31.2260] as [number, number] } },
 ];
 
-const greenCraftsmanIcon = L.divIcon({
+const availableIcon = L.divIcon({
   className: '',
   html: '<div style="width:28px;height:28px;border-radius:9999px;background:#0f5132;border:3px solid white;box-shadow:0 6px 16px rgba(15,81,50,.28);display:flex;align-items:center;justify-content:center;color:white;font-size:14px;font-weight:700;">⌂</div>',
+  iconSize: [28, 28],
+  iconAnchor: [14, 14],
+  popupAnchor: [0, -14],
+});
+
+const offlineIcon = L.divIcon({
+  className: '',
+  html: '<div style="width:28px;height:28px;border-radius:9999px;background:#9ca3af;border:3px solid white;box-shadow:0 6px 16px rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;color:white;font-size:14px;font-weight:700;">⌂</div>',
   iconSize: [28, 28],
   iconAnchor: [14, 14],
   popupAnchor: [0, -14],
@@ -73,14 +82,22 @@ export default function Map() {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       {craftsmen.map((c) => {
-        const coords = c.location?.coordinates || [30.0444, 31.2357];
+        const raw = c.location?.coordinates || [31.2357, 30.0444];
+        const coords: [number, number] = [raw[1], raw[0]];
+        const isAvail = c.isAvailable !== false;
         return (
-          <Marker key={c._id} position={coords as [number, number]} icon={greenCraftsmanIcon}>
+          <Marker key={c._id} position={coords} icon={isAvail ? availableIcon : offlineIcon}>
             <Popup>
               <div className="text-right" style={{ fontFamily: 'system-ui' }}>
-                <p className="font-bold text-sm">{c.name}</p>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className={`w-2 h-2 rounded-full ${isAvail ? 'bg-green-500' : 'bg-gray-400'}`} />
+                  <p className="font-bold text-sm">{c.name}</p>
+                </div>
                 <p className="text-xs text-amber-600">⭐ {c.rating?.toFixed(1)}</p>
                 <p className="text-xs text-gray-500">{formatTime(c.avgResponseTimeSeconds)}</p>
+                <p className={`text-xs mt-1 ${isAvail ? 'text-green-600' : 'text-gray-400'}`}>
+                  {isAvail ? '🟢 متاح الآن' : '⚪ غير متاح'}
+                </p>
               </div>
             </Popup>
           </Marker>

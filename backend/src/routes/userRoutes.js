@@ -31,8 +31,8 @@ router.get('/craftsmen', async (req, res) => {
   try {
     const User = require('../models/userModel');
     const craftsmen = await User.find(
-      { role: 'craftsman', isAvailable: true },
-      'name rating location avgResponseTimeSeconds'
+      { role: 'craftsman' },
+      'name rating location avgResponseTimeSeconds isAvailable'
     );
     res.status(200).json({ status: 'success', data: { craftsmen } });
   } catch (err) {
