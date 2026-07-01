@@ -29,6 +29,27 @@ router.get('/profile', authController.protect, (req, res) => {
   });
 });
 
+router.patch('/update-profile', authController.protect, async (req, res) => {
+  try {
+    const User = require('../models/userModel');
+    const { name, phone, address, avatar } = req.body;
+    const update: any = {};
+    if (name) update.name = name;
+    if (phone) update.phone = phone;
+    if (avatar) update.avatar = avatar;
+    if (address) update['location.address'] = address;
+
+    const user = await User.findByIdAndUpdate(req.user._id, update, {
+      new: true,
+      runValidators: true,
+    });
+
+    res.status(200).json({ status: 'success', data: { user } });
+  } catch (err) {
+    res.status(400).json({ status: 'fail', message: err.message });
+  }
+});
+
 router.get('/dashboard/customer', authController.protect, authController.restrictTo('customer', 'admin'), dashboardController.getCustomerDashboard);
 router.get('/dashboard/craftsman', authController.protect, authController.restrictTo('craftsman', 'admin'), dashboardController.getCraftsmanDashboard);
 

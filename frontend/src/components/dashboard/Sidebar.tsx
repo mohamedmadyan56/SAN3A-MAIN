@@ -39,9 +39,11 @@ export default function Sidebar({ items, role }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [userName, setUserName] = useState('');
+  const [userAvatar, setUserAvatar] = useState('');
 
   useEffect(() => {
     setUserName(localStorage.getItem('user_name') || '');
+    setUserAvatar(localStorage.getItem('user_avatar') || '');
   }, []);
 
   const handleLogout = () => {
@@ -67,9 +69,13 @@ export default function Sidebar({ items, role }: SidebarProps) {
           <span className="text-xl font-black text-gray-900 tracking-tight">صنعة</span>
         </Link>
         <div className="flex flex-col items-center text-center">
-          <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${getAvatarColor(userName)} flex items-center justify-center text-white text-xl font-bold shadow-sm mb-3`}>
-            {getInitials(userName)}
-          </div>
+          {userAvatar ? (
+            <img src={userAvatar} alt="Profile" className="w-16 h-16 rounded-2xl object-cover shadow-sm mb-3 border border-gray-100" />
+          ) : (
+            <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${getAvatarColor(userName)} flex items-center justify-center text-white text-xl font-bold shadow-sm mb-3`}>
+              {getInitials(userName)}
+            </div>
+          )}
           <h3 className="font-bold text-gray-900 text-sm">{userName || 'مستخدم'}</h3>
           <p className="text-xs text-gray-400">{roleLabel}</p>
         </div>
