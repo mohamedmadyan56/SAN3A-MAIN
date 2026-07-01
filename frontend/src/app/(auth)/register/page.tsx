@@ -42,6 +42,7 @@ export default function RegisterPage() {
         localStorage.setItem('user_token', token);
         localStorage.setItem('user_role', response.data.data?.user?.role || 'customer');
         localStorage.setItem('user_name', response.data.data?.user?.name || '');
+        localStorage.setItem('user_avatar', response.data.data?.user?.avatar || '');
         navigate.push('/');
       }
     } catch (err: any) {

@@ -42,6 +42,7 @@ export default function LoginPage() {
         localStorage.setItem('user_token', token);
         localStorage.setItem('user_role', userRole);
         localStorage.setItem('user_name', data?.user?.name || '');
+        localStorage.setItem('user_avatar', data?.user?.avatar || '');
 
         // تحويل الـ Toast لـ النجاح
         toast.success(`مرحبًا بعودتك يا ${data?.user?.name || ''} 🎉`, {
