@@ -338,7 +338,7 @@ exports.acceptRequest = async (req, res) => {
           $set: { status: 'ACCEPTED' },
           $push: { statusHistory: { status: 'ACCEPTED', changedAt: Date.now() } },
         },
-        { new: true }
+        { returnDocument: 'after' }
       );
 
       if (!currentRequest) {
@@ -358,21 +358,20 @@ exports.acceptRequest = async (req, res) => {
     }
 
     // العميل بيختار فني (من صفحة المطابقة)
-    const query = { _id: requestId, status: 'PENDING_MATCHING', client: req.user._id };
-
     const currentRequest = await Request.findOneAndUpdate(
-      query,
+      { _id: requestId, status: 'PENDING_MATCHING', client: req.user._id },
       {
         $set: { craftsman: selectedCraftsmanId, status: 'SELECTED' },
         $push: { statusHistory: { status: 'SELECTED', changedAt: Date.now() } },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!currentRequest) {
+      const statusAfter = await Request.findById(requestId);
       return res.status(409).json({
         status: 'fail',
-        message: 'الطلب لم يعد متاحاً'
+        message: `الطلب لم يعد متاحاً (الحالة الحالية: ${statusAfter?.status || 'غير موجود'})`
       });
     }
 
@@ -384,7 +383,7 @@ exports.acceptRequest = async (req, res) => {
     let responseSeconds = null;
     if (poolEntry) {
       poolEntry.respondedAt = new Date();
-      poolEntry.response = 'SELECTED';
+      poolEntry.response = 'ACCEPTED';
       responseSeconds = Math.round((poolEntry.respondedAt - poolEntry.offeredAt) / 1000);
     }
 
@@ -392,7 +391,9 @@ exports.acceptRequest = async (req, res) => {
 
     if (responseSeconds !== null) {
       const craftsman = await User.findById(selectedCraftsmanId);
-      await craftsman.recordResponseTime(responseSeconds);
+      if (craftsman) {
+        await craftsman.recordResponseTime(responseSeconds);
+      }
     }
 
     res.status(200).json({
@@ -404,6 +405,7 @@ exports.acceptRequest = async (req, res) => {
     });
 
   } catch (err) {
+    console.error('=== acceptRequest ERROR ===', err);
     res.status(500).json({
       status: 'error',
       message: 'حدث خطأ أثناء قبول الطلب',
