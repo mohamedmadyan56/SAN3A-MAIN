@@ -220,36 +220,45 @@ export default function CraftsmanDashboard() {
               {/* الطلبات المتاحة */}
               {data?.availableRequests && data.availableRequests.length > 0 && (
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
-                      <h2 className="font-bold text-gray-900">طلبات جديدة!</h2>
+                  <div className="flex items-center justify-between mb-5">
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping absolute" />
+                        <div className="w-2.5 h-2.5 rounded-full bg-red-500 relative" />
+                      </div>
+                      <h2 className="font-black text-gray-900 tracking-tight">طلبات جديدة!</h2>
                     </div>
-                    <span className="bg-red-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full animate-pulse">
+                    <span className="bg-gradient-to-l from-red-500 to-red-400 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm">
                       {data.availableRequests.length}
                     </span>
                   </div>
                   <div className="space-y-3">
                     {data.availableRequests.slice(0, 3).map((req) => (
-                      <div key={req._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 hover:bg-white hover:border-gray-200 transition-all">
+                      <div key={req._id} className="group flex items-center justify-between p-4 bg-gradient-to-l from-gray-50 to-white rounded-xl border border-gray-100 hover:border-red-200 hover:shadow-md transition-all duration-200">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-lg shadow-sm">
+                          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center text-lg shadow-sm group-hover:scale-105 transition-transform">
                             🛠️
                           </div>
                           <div>
                             <p className="font-bold text-gray-900 text-sm">{req.service?.nameAr || 'خدمة'}</p>
-                            <p className="text-xs text-gray-400">{req.client?.name} • {req.location?.address}</p>
-                            {req.clientNotes && <p className="text-xs text-gray-500 mt-1">«{req.clientNotes.substring(0, 40)}...»</p>}
+                            <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                              {req.client?.name}
+                              <span className="text-gray-300">•</span>
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                              {req.location?.address || 'بدون عنوان'}
+                            </p>
+                            {req.clientNotes && <p className="text-xs text-gray-500 mt-1.5 italic">"{req.clientNotes.substring(0, 40)}{req.clientNotes.length > 40 ? '...' : ''}"</p>}
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-black text-[#0f5132]">${req.pricing?.totalAmount || 0}</span>
+                          <span className="font-display text-base text-gray-900 ml-1">${req.pricing?.totalAmount || 0}</span>
                           <button onClick={() => handleAccept(req._id)}
-                            className="bg-[#0f5132] text-white text-xs font-bold px-4 py-2 rounded-xl hover:bg-[#0c3f27] transition-all shadow-sm">
+                            className="bg-gradient-to-l from-[#0f5132] to-[#0a3822] text-white text-xs font-bold px-4 py-2 rounded-xl hover:shadow-lg hover:shadow-[#0f5132]/20 hover:scale-[1.02] transition-all duration-200 shadow-sm">
                             قبول
                           </button>
                           <button onClick={() => handleReject(req._id)}
-                            className="border border-gray-200 text-gray-500 text-xs font-bold px-4 py-2 rounded-xl hover:bg-gray-50 transition-all">
+                            className="border border-gray-200 text-gray-500 text-xs font-bold px-4 py-2 rounded-xl hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all duration-200">
                             رفض
                           </button>
                         </div>
@@ -257,7 +266,7 @@ export default function CraftsmanDashboard() {
                     ))}
                   </div>
                   {data.availableRequests.length > 3 && (
-                    <button className="w-full text-center text-sm text-[#0f5132] font-bold mt-3 hover:underline py-2">
+                    <button className="w-full text-center text-sm text-[#0f5132] font-bold mt-4 py-2.5 rounded-xl hover:bg-[#eef6ef] transition-colors">
                       عرض الكل ({data.availableRequests.length})
                     </button>
                   )}
@@ -269,48 +278,59 @@ export default function CraftsmanDashboard() {
                 {/* المهام النشطة */}
                 {data?.activeJobs && data.activeJobs.length > 0 && (
                   <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                    <h2 className="font-bold text-gray-900 mb-4">المهام النشطة</h2>
+                    <div className="flex items-center justify-between mb-5">
+                      <h2 className="font-black text-gray-900 tracking-tight">المهام النشطة</h2>
+                      <span className="text-xs font-bold text-[#0f5132] bg-[#eef6ef] px-3 py-1 rounded-full">{data.activeJobs.length}</span>
+                    </div>
                     <div className="space-y-3">
                       {data.activeJobs.map((job) => (
-                        <div key={job._id} className="p-4 bg-gray-50 rounded-xl border border-gray-100 flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg shadow-sm ${
-                              job.status === 'ACCEPTED' ? 'bg-indigo-50' :
-                              job.status === 'ARRIVED' ? 'bg-purple-50' : 'bg-green-50'
-                            }`}>
-                              🛠️
+                        <div key={job._id} className="group p-4 bg-gradient-to-l from-gray-50 to-white rounded-xl border border-gray-100 hover:border-[#0f5132]/20 hover:shadow-md transition-all duration-200">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-lg shadow-sm group-hover:scale-105 transition-transform ${
+                                job.status === 'ACCEPTED' ? 'bg-gradient-to-br from-indigo-50 to-indigo-100' :
+                                job.status === 'ARRIVED' ? 'bg-gradient-to-br from-purple-50 to-purple-100' : 'bg-gradient-to-br from-green-50 to-green-100'
+                              }`}>
+                                🛠️
+                              </div>
+                              <div>
+                                <p className="font-bold text-gray-900 text-sm">{job.service?.nameAr || 'خدمة'}</p>
+                                <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                  {job.client?.name}
+                                  <span className="text-gray-300">•</span>
+                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                  {job.location?.address || 'بدون عنوان'}
+                                </p>
+                              </div>
                             </div>
-                            <div>
-                              <p className="font-bold text-gray-900 text-sm">{job.service?.nameAr || 'خدمة'}</p>
-                              <p className="text-xs text-gray-400">{job.client?.name} • {job.location?.address}</p>
+                            <div className="flex items-center gap-2">
+                              <span className={`text-xs font-bold px-2.5 py-1.5 rounded-full shadow-sm ${
+                                job.status === 'ACCEPTED' ? 'bg-indigo-50 text-indigo-700' :
+                                job.status === 'ARRIVED' ? 'bg-purple-50 text-purple-700' :
+                                'bg-green-50 text-green-700'
+                              }`}>
+                                {statusLabel(job.status)}
+                              </span>
+                              {job.status === 'ACCEPTED' && (
+                                <button onClick={() => handleStatusUpdate(job._id, 'ARRIVED')}
+                                  className="bg-indigo-50 text-indigo-700 text-xs font-bold px-3 py-2 rounded-xl hover:bg-indigo-100 hover:shadow-sm transition-all duration-200">
+                                  🚗 وصلت
+                                </button>
+                              )}
+                              {job.status === 'ARRIVED' && (
+                                <button onClick={() => handleStatusUpdate(job._id, 'IN_PROGRESS')}
+                                  className="bg-purple-50 text-purple-700 text-xs font-bold px-3 py-2 rounded-xl hover:bg-purple-100 hover:shadow-sm transition-all duration-200">
+                                  🔧 ابدأ
+                                </button>
+                              )}
+                              {job.status === 'IN_PROGRESS' && (
+                                <button onClick={() => handleStatusUpdate(job._id, 'COMPLETED')}
+                                  className="bg-green-50 text-green-700 text-xs font-bold px-3 py-2 rounded-xl hover:bg-green-100 hover:shadow-sm transition-all duration-200">
+                                  ✅ تم
+                                </button>
+                              )}
                             </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
-                              job.status === 'ACCEPTED' ? 'bg-indigo-50 text-indigo-700' :
-                              job.status === 'ARRIVED' ? 'bg-purple-50 text-purple-700' :
-                              'bg-green-50 text-green-700'
-                            }`}>
-                              {statusLabel(job.status)}
-                            </span>
-                            {job.status === 'ACCEPTED' && (
-                              <button onClick={() => handleStatusUpdate(job._id, 'ARRIVED')}
-                                className="bg-indigo-50 text-indigo-700 text-xs font-bold px-3 py-1.5 rounded-xl hover:bg-indigo-100 transition-all">
-                                🚗 وصلت
-                              </button>
-                            )}
-                            {job.status === 'ARRIVED' && (
-                              <button onClick={() => handleStatusUpdate(job._id, 'IN_PROGRESS')}
-                                className="bg-purple-50 text-purple-700 text-xs font-bold px-3 py-1.5 rounded-xl hover:bg-purple-100 transition-all">
-                                🔧 ابدأ
-                              </button>
-                            )}
-                            {job.status === 'IN_PROGRESS' && (
-                              <button onClick={() => handleStatusUpdate(job._id, 'COMPLETED')}
-                                className="bg-green-50 text-green-700 text-xs font-bold px-3 py-1.5 rounded-xl hover:bg-green-100 transition-all">
-                                ✅ تم
-                              </button>
-                            )}
                           </div>
                         </div>
                       ))}

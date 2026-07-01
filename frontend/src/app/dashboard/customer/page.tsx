@@ -67,7 +67,7 @@ export default function CustomerDashboard() {
     { label: 'الطلبات النشطة', href: '/dashboard/customer/requests', icon: '📋' },
     { label: 'السجل', href: '/dashboard/customer/history', icon: '📜' },
     { label: 'المفضلة', href: '/dashboard/customer/favorites', icon: '❤️' },
-    { label: 'الإعدادات', href: '/dashboard/customer/settings', icon: '⚙️' },
+    { label: 'الإعدادات', href: '/dashboard/settings', icon: '⚙️' },
   ];
 
   return (
@@ -112,24 +112,31 @@ export default function CustomerDashboard() {
 
               {data?.activeRequests && data.activeRequests.length > 0 && (
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
-                  <h2 className="font-black text-gray-900 mb-4 tracking-tight">الطلبات النشطة</h2>
+                  <div className="flex items-center justify-between mb-5">
+                    <h2 className="font-black text-gray-900 tracking-tight">الطلبات النشطة</h2>
+                    <span className="text-xs font-bold text-[#0f5132] bg-[#eef6ef] px-3 py-1 rounded-full">{data.activeRequests.length}</span>
+                  </div>
                   <div className="space-y-3">
                     {data.activeRequests.map((req) => (
-                      <div key={req._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-full bg-[#eef6ef] text-[#0f5132] flex items-center justify-center text-lg">
+                      <div key={req._id} className="group relative flex items-center justify-between p-4 pr-5 bg-gradient-to-l from-gray-50 to-white rounded-xl border border-gray-100 hover:border-[#0f5132]/20 hover:shadow-md transition-all duration-200">
+                        <div className="absolute right-0 top-4 bottom-4 w-1 rounded-full bg-gradient-to-b from-[#0f5132] to-[#22c55e] opacity-60 group-hover:opacity-100 transition-opacity" />
+                        <div className="flex items-center gap-3">
+                          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#eef6ef] to-[#dbeee0] text-[#0f5132] flex items-center justify-center text-lg shadow-sm group-hover:scale-105 transition-transform">
                             🛠️
                           </div>
                           <div>
-                            <p className="font-bold text-gray-900 text-sm">{req.service?.nameAr || 'خدمة'}</p>
-                            <p className="text-xs text-gray-400">{req.location?.address || ''}</p>
+                            <p className="font-bold text-gray-900 text-sm group-hover:text-[#0f5132] transition-colors">{req.service?.nameAr || 'خدمة'}</p>
+                            <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                              {req.location?.address || 'بدون عنوان'}
+                            </p>
                           </div>
                         </div>
                         <div className="text-left">
-                          <span className={`text-xs font-bold px-3 py-1 rounded-full ${statusColor(req.status)}`}>
+                          <span className={`text-xs font-bold px-3 py-1.5 rounded-full shadow-sm ${statusColor(req.status)}`}>
                             {statusLabel(req.status)}
                           </span>
-                          <p className="text-xs text-gray-400 mt-1">${req.pricing?.totalAmount || 0}</p>
+                          <p className="font-display text-sm text-gray-900 mt-1.5">${req.pricing?.totalAmount || 0}</p>
                         </div>
                       </div>
                     ))}
@@ -139,17 +146,23 @@ export default function CustomerDashboard() {
 
               {data?.requestHistory && data.requestHistory.length > 0 && (
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                  <h2 className="font-black text-gray-900 mb-4 tracking-tight">آخر الخدمات</h2>
-                  <div className="space-y-3">
+                  <div className="flex items-center justify-between mb-5">
+                    <h2 className="font-black text-gray-900 tracking-tight">آخر الخدمات</h2>
+                    <span className="text-xs font-bold text-gray-500 bg-gray-100 px-3 py-1 rounded-full">{data.requestHistory.length}</span>
+                  </div>
+                  <div className="space-y-1">
                     {data.requestHistory.map((req) => (
-                      <div key={req._id} className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
-                        <div>
-                          <p className="font-medium text-gray-900 text-sm">{req.service?.nameAr || 'خدمة'}</p>
-                          <p className="text-xs text-gray-400">
-                            {req.craftsman ? `الحرفي: ${req.craftsman.name}` : 'لم يتم التعيين'} • {new Date(req.createdAt).toLocaleDateString('ar-EG')}
-                          </p>
+                      <div key={req._id} className="flex items-center justify-between py-3 px-3 rounded-xl hover:bg-gray-50 transition-all">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center text-sm">🛠️</div>
+                          <div>
+                            <p className="font-bold text-gray-900 text-sm">{req.service?.nameAr || 'خدمة'}</p>
+                            <p className="text-xs text-gray-400">
+                              {req.craftsman ? `بواسطة ${req.craftsman.name}` : 'لم يتم التعيين'} • {new Date(req.createdAt).toLocaleDateString('ar-EG')}
+                            </p>
+                          </div>
                         </div>
-                        <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${statusColor(req.status)}`}>
+                        <span className={`text-xs font-bold px-2.5 py-1.5 rounded-full shadow-sm ${statusColor(req.status)}`}>
                           {statusLabel(req.status)}
                         </span>
                       </div>
