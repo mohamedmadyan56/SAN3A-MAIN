@@ -33,7 +33,7 @@ router.patch('/update-profile', authController.protect, async (req, res) => {
   try {
     const User = require('../models/userModel');
     const { name, phone, address, avatar } = req.body;
-    const update: any = {};
+    const update = {};
     if (name) update.name = name;
     if (phone) update.phone = phone;
     if (avatar) update.avatar = avatar;
