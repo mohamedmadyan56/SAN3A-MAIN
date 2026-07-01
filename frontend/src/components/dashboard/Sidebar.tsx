@@ -67,8 +67,8 @@ export default function Sidebar({ items, role }: SidebarProps) {
     <aside className="hidden md:flex flex-col w-64 bg-white border-l border-gray-200 min-h-screen shrink-0">
       {/* البروفايل */}
       <div className="p-6 border-b border-gray-100">
-        <Link href="/" className="flex items-center gap-2 mb-4">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#0f5132] to-[#0a3822] flex items-center justify-center text-white text-sm shadow-sm">
+        <Link href="/" className="flex items-center gap-3 mb-5">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--brand)] to-[var(--brand-dark)] flex items-center justify-center text-white text-sm shadow-sm">
             ⌂
           </div>
           <span className="text-xl font-black text-gray-900 tracking-tight">صنعة</span>
@@ -82,43 +82,43 @@ export default function Sidebar({ items, role }: SidebarProps) {
             </div>
           )}
           <h3 className="font-bold text-gray-900 text-sm">{userName || 'مستخدم'}</h3>
-          <p className="text-xs text-gray-400">{roleLabel}</p>
+          <p className="text-xs text-gray-400 mt-0.5">{roleLabel}</p>
         </div>
       </div>
 
       {/* القائمة */}
-      <nav className="flex-1 p-4 space-y-1">
+      <nav className="flex-1 p-3 space-y-1">
         {items.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+              className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                 isActive
-                  ? 'bg-[#eef6ef] text-[#0f5132] font-bold'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  ? 'bg-[var(--brand-light)] text-[var(--brand)] font-bold'
+                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
               }`}
             >
               <span className="text-lg">{item.icon}</span>
-              {item.label}
+              <span>{item.label}</span>
             </Link>
           );
         })}
       </nav>
 
       {/* الأزرار السفلية */}
-      <div className="p-4 border-t border-gray-100 space-y-2">
+      <div className="p-3 border-t border-gray-100 space-y-1">
         <Link
           href="/"
-          className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all"
+          className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200"
         >
           <span className="text-lg">🏠</span>
           العودة للموقع
         </Link>
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 transition-all"
+          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-[var(--danger)] hover:bg-[var(--danger-light)] transition-all duration-200"
         >
           <span className="text-lg">🚪</span>
           تسجيل الخروج

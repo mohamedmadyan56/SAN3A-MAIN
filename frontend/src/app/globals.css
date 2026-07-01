@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@100;200;300;400;500;600;700&family=VT323&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700;800&family=VT323&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -9,11 +9,32 @@
 :root {
   --brand: #0f5132;
   --brand-light: #eef6ef;
+  --brand-mid: #d5ede0;
   --brand-accent: #22c55e;
   --brand-dark: #0a2e1f;
+
+  --success: #16a34a;
+  --success-light: #dcfce7;
+  --danger: #dc2626;
+  --danger-light: #fee2e2;
+  --warning: #d97706;
+  --warning-light: #fef3c7;
+  --info: #2563eb;
+  --info-light: #dbeafe;
+
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --border-light: #f3f4f6;
+  --border-default: #e5e7eb;
+  --bg-page: #f9fafb;
+  --bg-card: #ffffff;
+
   --radius-card: 1rem;
   --radius-pill: 9999px;
+  --radius-button: 0.75rem;
   --shadow-card: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-card-hover: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 html {
@@ -21,8 +42,9 @@ html {
 }
 
 body {
-  font-weight: 350;
+  font-weight: 400;
   line-height: 1.7;
+  color: var(--text-primary);
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -30,7 +52,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 p {
-  font-weight: 300;
+  font-weight: 350;
   line-height: 1.8;
 }
 
