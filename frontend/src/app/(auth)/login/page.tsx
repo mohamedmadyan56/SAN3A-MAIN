@@ -5,6 +5,7 @@ import axios from 'axios';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
+import { API_BASE, extractTextContent } from '@/lib/api';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -27,7 +28,7 @@ export default function LoginPage() {
 
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/v1/users/login',
+        `${API_BASE}/users/login`,
         { email, password }
       );
 
@@ -61,11 +62,8 @@ export default function LoginPage() {
           }
         }, 800);
       }
-    } catch (err: any) {
-      // لقط رسالة الخطأ القادمة من الـ Backend (زي الباسورد الغلط اللي مطلع 401 في السكرين)
-      const msg =
-        err.response?.data?.message ||
-        'بريد إلكتروني أو كلمة مرور غير صحيحة، تأكد وحاول مجدداً';
+    } catch (err: unknown) {
+      const msg = extractTextContent(err, 'بريد إلكتروني أو كلمة مرور غير صحيحة، تأكد وحاول مجدداً');
       
       // تحويل نفس الـ Toast لـ خطأ
       toast.error(msg, {
@@ -77,60 +75,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-row-reverse bg-white">
-
-      {/* ===== الجانب الأيمن (بنر الترحيب) ===== */}
-      <div className="hidden lg:flex w-1/2 bg-gradient-to-b from-[#071C35] to-[#02111F] text-white relative">
-        <div className="w-full flex flex-col justify-center px-16">
-
-          <div className="absolute top-8 right-8">
-            <Image
-              src="/logo.png"
-              alt="Logo"
-              width={140}
-              height={45}
-              priority
-              className="object-contain"
-            />
-          </div>
-
-          <h1 className="text-5xl font-black leading-[1.15] tracking-tight mb-6">
-            مرحبًا بعودتك<br />
-            إلى منصة صنعة
-          </h1>
-
-          <p className="text-gray-300 text-lg font-light leading-[1.9] mb-12">
-            سجل الدخول للوصول إلى حسابك وإدارة خدماتك بسهولة.
-          </p>
-
-          <div className="space-y-6">
-            <div className="flex items-center gap-3 justify-end">
-              <span>تجربة استخدام سريعة</span>
-              <div className="w-8 h-8 rounded-full border border-green-400 flex items-center justify-center text-green-400">
-                ✓
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 justify-end">
-              <span>حساب آمن بالكامل</span>
-              <div className="w-8 h-8 rounded-full border border-green-400 flex items-center justify-center text-green-400">
-                🛡
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 justify-end">
-              <span>دعم مستمر 24/7</span>
-              <div className="w-8 h-8 rounded-full border border-green-400 flex items-center justify-center text-green-400">
-                🎧
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ===== الجانب الأيسر (الفورم) ===== */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
-        <div className="w-full max-w-xl" dir="rtl">
+    <div className="min-h-screen bg-[#eef6ef] flex items-center justify-center p-4" dir="rtl">
+        <div className="w-full max-w-md rounded-2xl shadow-sm border border-gray-100 p-8 bg-white">
 
           {/* اللوجو فوق الفورم */}
           <div className="flex justify-center mb-8">
@@ -145,7 +91,7 @@ export default function LoginPage() {
           </div>
 
           <div className="text-center mb-8">
-            <h2 className="text-4xl font-black text-gray-900 mb-2 tracking-tight">
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">
               تسجيل الدخول
             </h2>
             <p className="text-gray-500">أدخل بياناتك للمتابعة</p>
@@ -164,7 +110,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com"
-                className="w-full h-14 rounded-xl border border-gray-300 px-4 focus:outline-none focus:ring-2 focus:ring-[#007A4D] text-gray-900"
+                className="border border-gray-200 rounded-xl px-4 py-3 text-right w-full focus:border-[#0f5132] focus:ring-1 focus:ring-[#0f5132] outline-none"
               />
             </div>
 
@@ -178,14 +124,14 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full h-14 rounded-xl border border-gray-300 px-4 focus:outline-none focus:ring-2 focus:ring-[#007A4D] text-gray-900"
+                className="border border-gray-200 rounded-xl px-4 py-3 text-right w-full focus:border-[#0f5132] focus:ring-1 focus:ring-[#0f5132] outline-none"
               />
             </div>
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-[#007A4D] hover:bg-[#006341] disabled:bg-gray-400 transition text-white py-4 rounded-xl text-lg font-medium"
+              className="w-full bg-[#0f5132] text-white rounded-full font-bold hover:bg-[#0c3f27] transition-colors py-3 disabled:opacity-60"
             >
               {isLoading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}
             </button>
@@ -204,12 +150,11 @@ export default function LoginPage() {
           </div>
 
           <div className="flex justify-center gap-6 mt-12 text-lg">
-            <button className="text-[#007A4D] font-medium">العربية</button>
+            <button className="text-[#0f5132] font-medium">العربية</button>
             <button className="text-gray-500">English</button>
           </div>
 
         </div>
-      </div>
     </div>
   );
 }

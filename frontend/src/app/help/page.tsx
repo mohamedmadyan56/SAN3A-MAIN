@@ -1,5 +1,5 @@
 'use client';
-import Header from '@/components/Header';
+import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 
 const faqs = [
@@ -40,7 +40,7 @@ const faqs = [
 export default function HelpPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f0f7f2] to-[#e8f1eb]" dir="rtl">
-      <Header />
+      <Navbar />
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
         <div className="text-center mb-12">

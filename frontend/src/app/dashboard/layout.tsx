@@ -22,8 +22,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       return;
     }
 
-    setAuthorized(true);
-  }, [pathname]);
+    const timeout = window.setTimeout(() => setAuthorized(true), 0);
+    return () => window.clearTimeout(timeout);
+  }, [pathname, router]);
 
   if (!authorized) {
     return (

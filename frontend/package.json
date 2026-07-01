@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "NODE_OPTIONS='--max-old-space-size=4096' next dev --no-turbopack",
+    "dev": "NODE_OPTIONS='--max-old-space-size=4096' next dev",
     "dev:turbo": "NODE_OPTIONS='--max-old-space-size=4096' next dev --turbopack",
     "build": "next build",
     "start": "next start",
@@ -18,7 +18,7 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-hot-toast": "^2.6.0",
-    "react-leaflet": "^5.0.0"
+    "react-leaflet": "^4.2.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

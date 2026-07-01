@@ -3,7 +3,8 @@ import { useState, useEffect, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import axios from 'axios';
-import Header from '@/components/Header';
+import Navbar from '@/components/Navbar';
+import { API_BASE, extractTextContent, getAuthHeaders } from '@/lib/api';
 
 interface IService {
   _id: string;
@@ -85,7 +86,7 @@ export default function NewRequestPage() {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/v1/services');
+        const response = await axios.get(`${API_BASE}/services`);
         if (response.data.status === 'success') {
           const fetchedServices = response.data.data.services;
           setServices(fetchedServices);
@@ -93,7 +94,7 @@ export default function NewRequestPage() {
             setSelectedServiceId(fetchedServices[0]._id);
           }
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         setError('فشل في تحميل الخدمات من السيرفر، تأكد من تشغيل الباك إند');
       }
     };
@@ -102,9 +103,7 @@ export default function NewRequestPage() {
       try {
         const token = localStorage.getItem('token');
         if (!token) return;
-        const response = await axios.get('http://localhost:5000/api/v1/users/profile', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await axios.get(`${API_BASE}/users/profile`, { headers: getAuthHeaders() });
         if (response.data.data?.user?.location?.address) {
           setAddress(response.data.data.user.location.address);
         } else {
@@ -133,7 +132,7 @@ export default function NewRequestPage() {
       const token = localStorage.getItem('token');
 
       const response = await axios.post(
-        'http://localhost:5000/api/v1/requests',
+        `${API_BASE}/requests`,
         {
           service: selectedServiceId,
           address,
@@ -144,15 +143,15 @@ export default function NewRequestPage() {
           scheduledAt: timing === 'SCHEDULE' ? scheduledDate : undefined,
         },
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: token ? getAuthHeaders() : undefined,
         }
       );
 
       if (response.data.status === 'success') {
         router.push(`/requests/matching/${response.data.data.request._id}`);
       }
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'فشل في إنشاء الطلب، يرجى المحاولة مرة أخرى');
+    } catch (err: unknown) {
+      setError(extractTextContent(err, 'فشل في إنشاء الطلب، يرجى المحاولة مرة أخرى'));
     } finally {
       setLoading(false);
     }
@@ -166,7 +165,7 @@ export default function NewRequestPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f0f7f2] to-[#e8f1eb]" dir="rtl">
-      <Header />
+      <Navbar />
 
       <main className="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* العنوان والوصف */}

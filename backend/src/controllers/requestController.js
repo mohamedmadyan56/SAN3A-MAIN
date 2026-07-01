@@ -286,7 +286,9 @@ exports.createRequest = async (req, res) => {
 
 exports.getRequest = async (req, res) => {
     try {
-        const request = await Request.findById(req.params.id);
+        const request = await Request.findById(req.params.id)
+          .populate('service')
+          .populate('craftsman', 'name phone avatar rating avgResponseTimeSeconds location');
 
         if (!request) {
             return res.status(404).json({
@@ -315,43 +317,42 @@ exports.getRequest = async (req, res) => {
 exports.acceptRequest = async (req, res) => {
   try {
     const { requestId } = req.params;
+    const selectedCraftsmanId = req.user.role === 'customer' ? req.body.craftsmanId : req.user._id;
 
-    // 1. التأكد إن اللي بيطلبالمسار ده هو فني (Craftsman) فعلاً
-    // (الـ protect middleware بيكون حاطط بيانات الفني في req.user)
-    if (req.user.role !== 'craftsman') {
+    if (!['craftsman', 'customer'].includes(req.user.role)) {
       return res.status(403).json({
         status: 'fail',
-        message: 'غير مسموح لك بقبول هذا الطلب، هذا الإجراء مخصص للفنيين فقط'
+        message: 'غير مسموح لك بتنفيذ هذا الإجراء'
       });
     }
 
-    // 2. البحث عن الطلب والتأكد إنه لسه منتظر فني ومحدش خطفه قبله!
-    const currentRequest = await Request.findById(requestId);
-    
+    if (!selectedCraftsmanId) {
+      return res.status(400).json({ status: 'fail', message: 'يرجى تحديد الفني' });
+    }
+
+    const query = req.user.role === 'customer'
+      ? { _id: requestId, status: 'PENDING_MATCHING', client: req.user._id }
+      : { _id: requestId, status: 'PENDING_MATCHING' };
+
+    const currentRequest = await Request.findOneAndUpdate(
+      query,
+      {
+        $set: { craftsman: selectedCraftsmanId, status: 'SELECTED' },
+        $push: { statusHistory: { status: 'SELECTED', changedAt: Date.now() } },
+      },
+      { new: true }
+    );
+
     if (!currentRequest) {
-      return res.status(404).json({ status: 'fail', message: 'الطلب غير موجود' });
-    }
-
-    if (currentRequest.status !== 'PENDING_MATCHING') {
-      return res.status(400).json({
+      return res.status(409).json({
         status: 'fail',
-        message: 'عذراً، هذا الطلب لم يعد متاحاً (تم قبوله من فني آخر أو تم إلغاؤه)'
+        message: 'الطلب لم يعد متاحاً'
       });
     }
-
-    // 3. تحديث بيانات الطلب: ربطه بالفني وتغيير الحالة
-    currentRequest.craftsman = req.user._id;
-    currentRequest.status = 'ACCEPTED';
-    
-    // تسجيل تغيير الحالة في تاريخ الطلب (لو عامل فيلد للـ history)
-    currentRequest.statusHistory.push({
-      status: 'ACCEPTED',
-      changedAt: Date.now()
-    });
 
     // تسجيل رد الفني في matchingPool وحساب سرعة استجابته الفعلية
     const poolEntry = currentRequest.matchingPool.find(
-      (entry) => entry.craftsman.toString() === req.user._id.toString()
+      (entry) => entry.craftsman.toString() === selectedCraftsmanId.toString()
     );
 
     let responseSeconds = null;
@@ -363,10 +364,7 @@ exports.acceptRequest = async (req, res) => {
 
     await currentRequest.save();
 
-    // 4. تغيير حالة الفني لـ "مشغول" في جدول الـ Users
-    const craftsman = await User.findById(req.user._id);
-    craftsman.isAvailable = false;
-    await craftsman.save({ validateBeforeSave: false });
+    const craftsman = await User.findById(selectedCraftsmanId);
 
     // تحديث متوسط سرعة الاستجابة لو كان عندنا وقت العرض الأصلي
     if (responseSeconds !== null) {
@@ -375,7 +373,7 @@ exports.acceptRequest = async (req, res) => {
 
     res.status(200).json({
       status: 'success',
-      message: 'تم قبول الطلب بنجاح، بالتوفيق في عملك!',
+      message: 'تم اختيار الفني بنجاح، بانتظار تأكيد الحجز',
       data: {
         request: currentRequest
       }
@@ -386,6 +384,53 @@ exports.acceptRequest = async (req, res) => {
       status: 'error',
       message: 'حدث خطأ أثناء قبول الطلب',
       error: err.message
+    });
+  }
+};
+
+exports.confirmBooking = async (req, res) => {
+  try {
+    const { requestId } = req.params;
+    const { paymentMethod } = req.body;
+    const normalizedPaymentMethod = paymentMethod === 'CARD' ? 'CARD' : 'CASH';
+
+    const currentRequest = await Request.findById(requestId);
+    if (!currentRequest) {
+      return res.status(404).json({ status: 'fail', message: 'الطلب غير موجود' });
+    }
+
+    if (currentRequest.client.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ status: 'fail', message: 'غير مسموح لك بتأكيد هذا الحجز' });
+    }
+
+    if (currentRequest.status !== 'SELECTED') {
+      return res.status(400).json({ status: 'fail', message: 'يجب اختيار فني قبل تأكيد الحجز' });
+    }
+
+    currentRequest.status = 'ACCEPTED';
+    currentRequest.paymentMethod = normalizedPaymentMethod;
+    currentRequest.isPaid = normalizedPaymentMethod === 'CARD';
+    currentRequest.statusHistory.push({
+      status: 'ACCEPTED',
+      changedAt: Date.now(),
+    });
+
+    await currentRequest.save();
+
+    if (currentRequest.craftsman) {
+      await User.findByIdAndUpdate(currentRequest.craftsman, { isAvailable: false });
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: 'تم تأكيد الحجز بنجاح',
+      data: { request: currentRequest },
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: 'error',
+      message: 'حدث خطأ أثناء تأكيد الحجز',
+      error: err.message,
     });
   }
 };

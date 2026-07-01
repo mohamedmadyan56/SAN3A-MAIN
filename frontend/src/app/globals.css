@@ -5,6 +5,16 @@
   --font-sans: 'IBM Plex Sans Arabic', sans-serif;
 }
 
+:root {
+  --brand: #0f5132;
+  --brand-light: #eef6ef;
+  --brand-accent: #22c55e;
+  --brand-dark: #0a2e1f;
+  --radius-card: 1rem;
+  --radius-pill: 9999px;
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.08);
+}
+
 html {
   font-family: var(--font-sans);
 }

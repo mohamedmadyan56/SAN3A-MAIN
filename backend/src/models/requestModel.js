@@ -19,12 +19,12 @@ const requestSchema = new mongoose.Schema({
   
   status: {
     type: String,
-    enum: ['PENDING_MATCHING', 'ACCEPTED', 'ARRIVED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'DISPUTED', 'REFUNDED'],
+    enum: ['PENDING_MATCHING', 'SELECTED', 'ACCEPTED', 'ARRIVED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'DISPUTED', 'REFUNDED'],
     default: 'PENDING_MATCHING' // الحالة المبدئية: جاري البحث عن فني
   },
   statusHistory:[{
     status:{type:String},
-    changeAt:{type:Date,default:Date.now},
+    changedAt:{type:Date,default:Date.now},
     note:{type:String}
   }],
 

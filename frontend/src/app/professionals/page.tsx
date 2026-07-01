@@ -1,8 +1,9 @@
 'use client';
 import { useEffect, useState } from 'react';
-import Header from '@/components/Header';
+import Navbar from '@/components/Navbar';
 import Link from 'next/link';
 import axios from 'axios';
+import { API_BASE } from '@/lib/api';
 
 interface Professional {
   _id: string;
@@ -11,6 +12,10 @@ interface Professional {
   avgResponseTimeSeconds: number | null;
   avatar?: string;
   location?: { address?: string };
+}
+
+interface ServiceSummary {
+  _id?: string;
 }
 
 function formatResponseTime(seconds: number | null): string {
@@ -35,10 +40,10 @@ export default function ProfessionalsPage() {
   useEffect(() => {
     const fetchProfessionals = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/v1/services');
+        const res = await axios.get(`${API_BASE}/services`);
         if (res.data.status === 'success') {
           const services = res.data.data.services;
-          const dummy = services.slice(0, 4).map((s: any, i: number) => ({
+          const dummy = services.slice(0, 4).map((s: ServiceSummary, i: number) => ({
             _id: s._id || String(i),
             name: ['أحمد السيد', 'مصطفى محمود', 'كريم حسن', 'محمد علي'][i],
             rating: [4.9, 4.8, 4.7, 4.9][i],
@@ -55,7 +60,7 @@ export default function ProfessionalsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f0f7f2] to-[#e8f1eb]" dir="rtl">
-      <Header />
+      <Navbar />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
         {/* العنوان */}

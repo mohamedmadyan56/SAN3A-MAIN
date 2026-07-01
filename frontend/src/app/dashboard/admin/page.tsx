@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Sidebar from '@/components/dashboard/Sidebar';
+import { API_BASE, getAuthHeaders } from '@/lib/api';
 
 interface Stats {
   totalUsers: number;
@@ -51,10 +52,25 @@ const NAV_ITEMS = [
   { label: 'الطلبات', href: '/dashboard/admin?tab=requests', icon: '📋' },
 ];
 
-const API = 'http://localhost:5000/api/v1/admin';
+const API = `${API_BASE}/admin`;
+
+function StatCard({ label, value, icon, color }: { label: string; value: string | number; icon: string; color: string }) {
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+      <div className="flex items-center justify-between mb-3">
+        <span className={`text-3xl ${color}`}>{icon}</span>
+        <span className="text-3xl font-black text-gray-900 tracking-tight">{value}</span>
+      </div>
+      <p className="text-sm text-gray-500 font-light">{label}</p>
+    </div>
+  );
+}
 
 export default function AdminDashboard() {
-  const [tab, setTab] = useState('overview');
+  const [tab, setTab] = useState(() => {
+    if (typeof window === 'undefined') return 'overview';
+    return new URLSearchParams(window.location.search).get('tab') || 'overview';
+  });
   const [stats, setStats] = useState<Stats | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [disputes, setDisputes] = useState<Dispute[]>([]);
@@ -67,18 +83,8 @@ export default function AdminDashboard() {
   const [userTotalPages, setUserTotalPages] = useState(1);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const tabParam = params.get('tab');
-    if (tabParam) setTab(tabParam);
-  }, []);
-
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') || localStorage.getItem('user_token') : '';
-
-  const headers = { Authorization: `Bearer ${token}` };
-
-  useEffect(() => {
     if (tab === 'overview') {
-      axios.get(`${API}/dashboard`, { headers }).then((res) => {
+      axios.get(`${API}/dashboard`, { headers: getAuthHeaders() }).then((res) => {
         if (res.data.status === 'success') setStats(res.data.data.stats);
       }).catch(() => {}).finally(() => setLoading(false));
     }
@@ -87,7 +93,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (tab === 'users') {
       axios.get(`${API}/users`, {
-        headers,
+        headers: getAuthHeaders(),
         params: { search: userSearch, role: userRoleFilter, status: userStatusFilter, page: userPage },
       }).then((res) => {
         if (res.data.status === 'success') {
@@ -100,7 +106,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (tab === 'disputes') {
-      axios.get(`${API}/disputes`, { headers }).then((res) => {
+      axios.get(`${API}/disputes`, { headers: getAuthHeaders() }).then((res) => {
         if (res.data.status === 'success') setDisputes(res.data.data.disputes);
       }).catch(() => {}).finally(() => setLoading(false));
     }
@@ -108,7 +114,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (tab === 'requests') {
-      axios.get(`${API}/requests`, { headers }).then((res) => {
+      axios.get(`${API}/requests`, { headers: getAuthHeaders() }).then((res) => {
         if (res.data.status === 'success') setRequests(res.data.data.requests);
       }).catch(() => {}).finally(() => setLoading(false));
     }
@@ -116,40 +122,30 @@ export default function AdminDashboard() {
 
   const handleResolveDispute = async (id: string, resolution: string) => {
     try {
-      await axios.patch(`${API}/disputes/${id}/resolve`, { resolution }, { headers });
+      await axios.patch(`${API}/disputes/${id}/resolve`, { resolution }, { headers: getAuthHeaders() });
       setDisputes((prev) => prev.filter((d) => d._id !== id));
-    } catch (err) {}
+    } catch {}
   };
 
   const handleToggleUserStatus = async (id: string, currentStatus: boolean) => {
     try {
-      await axios.patch(`${API}/users/${id}`, { isActive: !currentStatus }, { headers });
+      await axios.patch(`${API}/users/${id}`, { isActive: !currentStatus }, { headers: getAuthHeaders() });
       setUsers((prev) => prev.map((u) => (u._id === id ? { ...u, isActive: !currentStatus } : u)));
-    } catch (err) {}
+    } catch {}
   };
 
   const handleDeleteUser = async (id: string) => {
     if (!confirm('هل أنت متأكد من حذف هذا المستخدم؟')) return;
     try {
-      await axios.delete(`${API}/users/${id}`, { headers });
+      await axios.delete(`${API}/users/${id}`, { headers: getAuthHeaders() });
       setUsers((prev) => prev.filter((u) => u._id !== id));
-    } catch (err) {}
+    } catch {}
   };
 
   const updateUrl = (newTab: string) => {
     setTab(newTab);
     window.history.pushState({}, '', `/dashboard/admin${newTab !== 'overview' ? `?tab=${newTab}` : ''}`);
   };
-
-  const StatCard = ({ label, value, icon, color }: { label: string; value: string | number; icon: string; color: string }) => (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-      <div className="flex items-center justify-between mb-3">
-        <span className={`text-3xl ${color}`}>{icon}</span>
-        <span className="text-3xl font-black text-gray-900 tracking-tight">{value}</span>
-      </div>
-      <p className="text-sm text-gray-500 font-light">{label}</p>
-    </div>
-  );
 
   return (
     <div className="min-h-screen bg-gray-50 flex" dir="rtl">

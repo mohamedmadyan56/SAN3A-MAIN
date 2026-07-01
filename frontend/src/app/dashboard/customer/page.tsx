@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import Sidebar from '@/components/dashboard/Sidebar';
+import { API_BASE, getAuthHeaders } from '@/lib/api';
 
 interface RequestType {
   _id: string;
@@ -18,7 +19,7 @@ interface DashboardData {
   activeRequests: RequestType[];
   requestHistory: RequestType[];
   totalSpent: number;
-  favorites: any[];
+  favorites: unknown[];
 }
 
 export default function CustomerDashboard() {
@@ -30,8 +31,8 @@ export default function CustomerDashboard() {
     const token = localStorage.getItem('token') || localStorage.getItem('user_token');
     if (!token) { router.push('/login'); return; }
 
-    axios.get('http://localhost:5000/api/v1/users/dashboard/customer', {
-      headers: { Authorization: `Bearer ${token}` },
+    axios.get(`${API_BASE}/users/dashboard/customer`, {
+      headers: getAuthHeaders(),
     }).then((res) => {
       if (res.data.status === 'success') setData(res.data.data);
     }).catch(() => {}).finally(() => setLoading(false));
@@ -40,6 +41,7 @@ export default function CustomerDashboard() {
   const statusLabel = (s: string) => {
     const map: Record<string, string> = {
       PENDING_MATCHING: 'قيد البحث عن حرفي',
+      SELECTED: 'بانتظار تأكيد الحجز',
       ACCEPTED: 'تم قبول الطلب',
       ARRIVED: 'الحرفي في الطريق',
       IN_PROGRESS: 'جاري العمل',

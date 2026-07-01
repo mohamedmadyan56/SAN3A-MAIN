@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import Sidebar from '@/components/dashboard/Sidebar';
+import { API_BASE, getAuthHeaders } from '@/lib/api';
 
 interface User {
   name: string;
@@ -31,39 +32,17 @@ interface DashboardData {
   availableRequests: Job[];
 }
 
-function getInitials(name: string): string {
-  return name?.split(' ').slice(0, 2).map((n) => n[0]).join('').toUpperCase() || '?';
-}
-
-function getAvatarColor(name: string): string {
-  const colors = [
-    'from-[#0f5132] to-[#0a3822]',
-    'from-[#dc2626] to-[#991b1b]',
-    'from-[#2563eb] to-[#1e40af]',
-    'from-[#7c3aed] to-[#5b21b6]',
-    'from-[#d97706] to-[#92400e]',
-    'from-[#0891b2] to-[#155e75]',
-  ];
-  let hash = 0;
-  for (let i = 0; i < (name || '').length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return colors[Math.abs(hash) % colors.length];
-}
-
 export default function CraftsmanDashboard() {
   const router = useRouter();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [userName, setUserName] = useState('');
 
   useEffect(() => {
-    setUserName(localStorage.getItem('user_name') || '');
     const token = localStorage.getItem('token') || localStorage.getItem('user_token');
     if (!token) { router.push('/login'); return; }
 
-    axios.get('http://localhost:5000/api/v1/users/dashboard/craftsman', {
-      headers: { Authorization: `Bearer ${token}` },
+    axios.get(`${API_BASE}/users/dashboard/craftsman`, {
+      headers: getAuthHeaders(),
     }).then((res) => {
       if (res.data.status === 'success') setData(res.data.data);
     }).catch(() => {}).finally(() => setLoading(false));
@@ -71,44 +50,41 @@ export default function CraftsmanDashboard() {
 
   const handleAccept = async (id: string) => {
     try {
-      const token = localStorage.getItem('token') || localStorage.getItem('user_token');
-      await axios.post(`http://localhost:5000/api/v1/requests/${id}/accept`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
+      await axios.post(`${API_BASE}/requests/${id}/accept`, {}, {
+        headers: getAuthHeaders(),
       });
       setData((prev) => prev ? {
         ...prev,
         availableRequests: prev.availableRequests.filter((r) => r._id !== id),
         stats: { ...prev.stats, activeJobs: prev.stats.activeJobs + 1 },
       } : prev);
-    } catch (err) {}
+    } catch {}
   };
 
   const handleReject = async (id: string) => {
     try {
-      const token = localStorage.getItem('token') || localStorage.getItem('user_token');
-      await axios.post(`http://localhost:5000/api/v1/requests/${id}/reject`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
+      await axios.post(`${API_BASE}/requests/${id}/reject`, {}, {
+        headers: getAuthHeaders(),
       });
       setData((prev) => prev ? {
         ...prev,
         availableRequests: prev.availableRequests.filter((r) => r._id !== id),
       } : prev);
-    } catch (err) {}
+    } catch {}
   };
 
   const handleStatusUpdate = async (id: string, status: string) => {
     try {
-      const token = localStorage.getItem('token') || localStorage.getItem('user_token');
-      await axios.patch(`http://localhost:5000/api/v1/requests/${id}/status`, { status }, {
-        headers: { Authorization: `Bearer ${token}` },
+      await axios.patch(`${API_BASE}/requests/${id}/status`, { status }, {
+        headers: getAuthHeaders(),
       });
       if (status === 'COMPLETED') {
-        await axios.patch(`http://localhost:5000/api/v1/requests/${id}/complete`, {}, {
-          headers: { Authorization: `Bearer ${token}` },
+        await axios.patch(`${API_BASE}/requests/${id}/complete`, {}, {
+          headers: getAuthHeaders(),
         });
       }
       window.location.reload();
-    } catch (err) {}
+    } catch {}
   };
 
   const NAV_ITEMS = [
@@ -122,6 +98,7 @@ export default function CraftsmanDashboard() {
   const statusLabel = (s: string) => {
     const map: Record<string, string> = {
       PENDING_MATCHING: 'متاح',
+      SELECTED: 'بانتظار التأكيد',
       ACCEPTED: 'مقبول',
       ARRIVED: 'في الطريق',
       IN_PROGRESS: 'قيد التنفيذ',
@@ -262,7 +239,7 @@ export default function CraftsmanDashboard() {
                           <div>
                             <p className="font-bold text-gray-900 text-sm">{req.service?.nameAr || 'خدمة'}</p>
                             <p className="text-xs text-gray-400">{req.client?.name} • {req.location?.address}</p>
-                            {req.clientNotes && <p className="text-xs text-gray-500 mt-1">"{req.clientNotes.substring(0, 40)}..."</p>}
+                            {req.clientNotes && <p className="text-xs text-gray-500 mt-1">«{req.clientNotes.substring(0, 40)}...»</p>}
                           </div>
                         </div>
                         <div className="flex items-center gap-2">

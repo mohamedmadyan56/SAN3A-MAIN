@@ -2,8 +2,8 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-export default function withAuth(Component: React.ComponentType, allowedRoles?: string[]) {
-  return function AuthenticatedComponent(props: any) {
+export default function withAuth<P extends object>(Component: React.ComponentType<P>, allowedRoles?: string[]) {
+  return function AuthenticatedComponent(props: P) {
     const router = useRouter();
     const [isAuthorized, setIsAuthorized] = useState(false);
 
@@ -21,8 +21,9 @@ export default function withAuth(Component: React.ComponentType, allowedRoles?: 
         return;
       }
 
-      setIsAuthorized(true);
-    }, []);
+      const timeout = window.setTimeout(() => setIsAuthorized(true), 0);
+      return () => window.clearTimeout(timeout);
+    }, [router]);
 
     if (!isAuthorized) {
       return (

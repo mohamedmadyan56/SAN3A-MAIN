@@ -3,7 +3,8 @@ import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import axios from 'axios';
-import Header from '@/components/Header';
+import Navbar from '@/components/Navbar';
+import { API_BASE, extractTextContent, getAuthHeaders } from '@/lib/api';
 
 interface MatchBreakdown {
   distance: number;
@@ -41,12 +42,6 @@ function formatResponseTime(seconds: number | null): string {
   return `${Math.round(seconds / 60)} دقيقة`;
 }
 
-function getMatchColor(percent: number): string {
-  if (percent >= 85) return '#0f5132';
-  if (percent >= 65) return '#0f5132';
-  return '#0f5132';
-}
-
 export default function MatchResultsPage({ params }: ResultsPageProps) {
   const { requestId } = use(params);
   const router = useRouter();
@@ -56,28 +51,31 @@ export default function MatchResultsPage({ params }: ResultsPageProps) {
   const [error, setError] = useState<string>('');
   const [selectingId, setSelectingId] = useState<string | null>(null);
   const [confirmedId, setConfirmedId] = useState<string | null>(null);
+  const [progressReady, setProgressReady] = useState(false);
+  const [remainingSeconds, setRemainingSeconds] = useState(600);
+  const expired = remainingSeconds <= 0;
+  const topMatch = matches[0];
 
   useEffect(() => {
     const fetchMatchResults = async () => {
       try {
-        const token = localStorage.getItem('token');
-        if (!token) {
+        if (!localStorage.getItem('token') && !localStorage.getItem('user_token')) {
           setError('لم يتم العثور على توكن تسجيل الدخول');
           setLoading(false);
           return;
         }
 
         const response = await axios.get(
-          `http://localhost:5000/api/v1/requests/${requestId}/match-results`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          `${API_BASE}/requests/${requestId}/match-results`,
+          { headers: getAuthHeaders() }
         );
 
         if (response.data.status === 'success') {
           setMatches(response.data.data.matches);
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('خطأ أثناء جلب نتائج التطابق:', err);
-        setError('تعذر تحميل نتائج التطابق، حاول مرة أخرى');
+        setError(extractTextContent(err, 'تعذر تحميل نتائج التطابق، حاول مرة أخرى'));
       } finally {
         setLoading(false);
       }
@@ -86,36 +84,62 @@ export default function MatchResultsPage({ params }: ResultsPageProps) {
     fetchMatchResults();
   }, [requestId]);
 
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setProgressReady(true));
+    return () => cancelAnimationFrame(frame);
+  }, [topMatch?._id]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setRemainingSeconds((prev) => Math.max(prev - 1, 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!expired) return;
+    const timeout = setTimeout(() => router.push(`/requests/matching/${requestId}`), 1500);
+    return () => clearTimeout(timeout);
+  }, [expired, requestId, router]);
+
   const handleConfirmSelection = async (craftsman: MatchResult) => {
     setSelectingId(craftsman._id);
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `http://localhost:5000/api/v1/requests/${requestId}/accept`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
+        `${API_BASE}/requests/${requestId}/accept`,
+        { craftsmanId: craftsman._id },
+        { headers: token ? getAuthHeaders() : undefined }
       );
       setConfirmedId(craftsman._id);
-    } catch (err: any) {
+      router.push(`/requests/${requestId}/payment`);
+    } catch (err: unknown) {
       console.error('خطأ أثناء تأكيد الاختيار:', err);
-      setError('تعذر تأكيد الاختيار، حاول مرة أخرى');
+      setError(extractTextContent(err, 'تعذر تأكيد الاختيار، حاول مرة أخرى'));
     } finally {
       setSelectingId(null);
     }
   };
 
-  const topMatch = matches[0];
-  const restMatches = matches.slice(1);
-
   const dashOffset = topMatch
-    ? CIRCLE_CIRCUMFERENCE - (topMatch.matchPercentage / 100) * CIRCLE_CIRCUMFERENCE
+    ? progressReady
+      ? CIRCLE_CIRCUMFERENCE - (topMatch.matchPercentage / 100) * CIRCLE_CIRCUMFERENCE
+      : CIRCLE_CIRCUMFERENCE
     : CIRCLE_CIRCUMFERENCE;
+
+  const minutes = Math.floor(remainingSeconds / 60).toString().padStart(2, '0');
+  const seconds = (remainingSeconds % 60).toString().padStart(2, '0');
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f0f7f2] to-[#e8f1eb]" dir="rtl">
-      <Header />
+      <Navbar />
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <div className="mb-6 flex justify-center">
+          <div className={`rounded-full px-4 py-2 text-sm font-bold ${expired ? 'bg-red-50 text-red-600' : 'bg-white text-[#0f5132] border border-gray-100 shadow-sm'}`}>
+            {expired ? 'انتهت صلاحية هذا العرض' : `باقي الوقت ${minutes}:${seconds}`}
+          </div>
+        </div>
         {error && (
           <div className="bg-red-50/80 border border-red-200 text-red-700 p-4 rounded-2xl text-sm flex items-center gap-3 mb-6">
             <span className="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center text-xs font-bold shrink-0">!</span>
@@ -237,7 +261,7 @@ export default function MatchResultsPage({ params }: ResultsPageProps) {
                   <button
                     type="button"
                     onClick={() => handleConfirmSelection(topMatch)}
-                    disabled={selectingId === topMatch._id || confirmedId === topMatch._id}
+                    disabled={expired || selectingId === topMatch._id || confirmedId === topMatch._id}
                     className="flex-1 bg-gradient-to-l from-[#0f5132] to-[#0a3822] text-white text-sm font-bold py-3 rounded-2xl hover:shadow-lg hover:shadow-[#0f5132]/20 transition-all disabled:opacity-50"
                   >
                     {confirmedId === topMatch._id
@@ -328,7 +352,7 @@ export default function MatchResultsPage({ params }: ResultsPageProps) {
                       <button
                         type="button"
                         onClick={() => handleConfirmSelection(m)}
-                        disabled={selectingId === m._id || isConfirmed}
+                        disabled={expired || selectingId === m._id || isConfirmed}
                         className={`w-full text-xs font-bold py-2.5 rounded-xl transition-all disabled:opacity-50 ${
                           isConfirmed
                             ? 'bg-[#0f5132] text-white'

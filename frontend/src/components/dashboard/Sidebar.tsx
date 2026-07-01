@@ -42,8 +42,11 @@ export default function Sidebar({ items, role }: SidebarProps) {
   const [userAvatar, setUserAvatar] = useState('');
 
   useEffect(() => {
-    setUserName(localStorage.getItem('user_name') || '');
-    setUserAvatar(localStorage.getItem('user_avatar') || '');
+    const timeout = window.setTimeout(() => {
+      setUserName(localStorage.getItem('user_name') || '');
+      setUserAvatar(localStorage.getItem('user_avatar') || '');
+    }, 0);
+    return () => window.clearTimeout(timeout);
   }, []);
 
   const handleLogout = () => {

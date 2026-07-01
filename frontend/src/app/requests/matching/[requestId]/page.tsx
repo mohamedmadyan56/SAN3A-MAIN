@@ -3,7 +3,8 @@ import { useEffect, useState, useRef, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import axios from 'axios';
-import Header from '@/components/Header';
+import Navbar from '@/components/Navbar';
+import { API_BASE, extractTextContent, getAuthHeaders } from '@/lib/api';
 
 interface Craftsman {
   _id: string;
@@ -32,6 +33,7 @@ export default function MatchingPage({ params }: MatchingPageProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState<number>(0);
   const [searchRadiusExpanded, setSearchRadiusExpanded] = useState<boolean>(false);
+  const [navigatingResults, setNavigatingResults] = useState<boolean>(false);
 
   const knownIdsRef = useRef<Set<string>>(new Set());
   const [newIds, setNewIds] = useState<Set<string>>(new Set());
@@ -39,16 +41,15 @@ export default function MatchingPage({ params }: MatchingPageProps) {
   useEffect(() => {
     const fetchNearbyCraftsmen = async () => {
       try {
-        const token = localStorage.getItem('token');
-        if (!token) {
+        if (!localStorage.getItem('token') && !localStorage.getItem('user_token')) {
           setError('لم يتم العثور على توكن تسجيل الدخول');
           return;
         }
 
         const response = await axios.get(
-          `http://localhost:5000/api/v1/requests/${requestId}/nearby-craftsmen`,
+          `${API_BASE}/requests/${requestId}/nearby-craftsmen`,
           {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: getAuthHeaders(),
             params: searchRadiusExpanded ? { radius: 10000 } : undefined,
           }
         );
@@ -66,8 +67,9 @@ export default function MatchingPage({ params }: MatchingPageProps) {
           setCraftsmen(fetched);
           setError('');
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('خطأ أثناء تحديث الرادار:', err);
+        setError(extractTextContent(err, 'تعذر تحديث نتائج الرادار'));
       } finally {
         setLoading(false);
       }
@@ -101,11 +103,16 @@ export default function MatchingPage({ params }: MatchingPageProps) {
     setSelectedId(craftsman._id);
   };
 
+  const goToResults = () => {
+    setNavigatingResults(true);
+    router.push(`/requests/matching/${requestId}/results`);
+  };
+
   const showTimeoutNotice = elapsedSeconds >= TIMEOUT_THRESHOLD && !searchRadiusExpanded;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f0f7f2] to-[#e8f1eb]" dir="rtl">
-      <Header />
+      <Navbar />
 
       {/* المحتوى الرئيسي */}
       <main className="max-w-lg mx-auto px-4 sm:px-6 py-8 sm:py-12">
@@ -214,11 +221,21 @@ export default function MatchingPage({ params }: MatchingPageProps) {
           {craftsmen.length > 0 && (
             <button
               type="button"
-              onClick={() => router.push(`/requests/matching/${requestId}/results`)}
+              onClick={goToResults}
+              disabled={navigatingResults}
               className="w-full bg-gradient-to-l from-[#0f5132] to-[#0a3822] text-white text-sm font-bold py-3 rounded-2xl hover:shadow-lg hover:shadow-[#0f5132]/20 transition-all"
             >
-              عرض النتائج ({craftsmen.length})
-              <span className="mr-2">←</span>
+              {navigatingResults ? (
+                <span className="inline-flex items-center justify-center gap-2">
+                  <span className="w-4 h-4 rounded-full border-2 border-white/40 border-t-white animate-spin" />
+                  جاري عرض النتائج
+                </span>
+              ) : (
+                <>
+                  عرض النتائج ({craftsmen.length})
+                  <span className="mr-2">←</span>
+                </>
+              )}
             </button>
           )}
         </div>
@@ -276,7 +293,7 @@ export default function MatchingPage({ params }: MatchingPageProps) {
               return (
                 <div
                   key={craftsman._id}
-                  className={`flex items-center justify-between p-4 rounded-2xl border-2 transition-all duration-200 ${
+                  className={`min-h-[72px] flex items-center justify-between p-4 rounded-2xl border-2 transition-all duration-200 ${
                     isSelected
                       ? 'border-[#0f5132] bg-[#eef6ef]'
                       : 'border-transparent bg-gray-50 hover:bg-white hover:border-gray-200 hover:shadow-sm'

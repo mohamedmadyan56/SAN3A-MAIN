@@ -12,6 +12,7 @@ router.post("/", requestController.createRequest);
 router.get("/:id", requestController.getRequest);
 router.patch('/:requestId/status', requestController.updateRequestStatus);
 router.patch('/:requestId/complete', requestController.completeRequest);
+router.post('/:requestId/confirm-booking', requestController.confirmBooking);
 router.post('/:requestId/accept', requestController.acceptRequest);
 router.post('/:requestId/reject', requestController.rejectRequest);
 module.exports = router;

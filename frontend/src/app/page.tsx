@@ -1,8 +1,7 @@
 'use client';
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import Header from '@/components/Header';
+import Navbar from '@/components/Navbar';
 
 const SERVICES = [
   { name: 'الدهانات', icon: '🎨', desc: 'دهان الجدران والأسطح الداخلية والخارجية' },
@@ -39,15 +38,9 @@ const Map = dynamic(() => import('@/components/Map'), {
 });
 
 export default function LandingPage() {
-  const [userName, setUserName] = useState<string | null>(null);
-
-  useEffect(() => {
-    setUserName(localStorage.getItem('user_name'));
-  }, []);
-
   return (
     <div className="min-h-screen bg-white" dir="rtl">
-      <Header />
+      <Navbar />
 
       {/* الهيرو */}
       <section className="relative overflow-hidden bg-gradient-to-l from-[#0a2e1f] via-[#0d3d28] to-[#0f5132]">
@@ -68,7 +61,7 @@ export default function LandingPage() {
                 تواصل مع محترفي خدمات معتمدين وحاصلين على تقييمات عالية لجميع احتياجات صيانة وتحسين منزلك. سريع، موثوق، ومضمون.
               </p>
 
-              <div className="flex flex-wrap gap-3 mb-12">
+              <div className="flex flex-row-reverse justify-end flex-wrap gap-3 mb-12">
                 <Link
                   href="/requests/new"
                   className="flex items-center gap-2 bg-[#22c55e] hover:bg-[#16a34a] text-[#0a2e1f] font-bold text-sm px-6 py-3 rounded-full transition-all shadow-lg shadow-[#22c55e]/20"

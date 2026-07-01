@@ -5,6 +5,7 @@ import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { CldUploadWidget } from 'next-cloudinary';
 import Sidebar from '@/components/dashboard/Sidebar';
+import { API_BASE, extractTextContent, getAuthHeaders } from '@/lib/api';
 
 function getInitials(name: string): string {
   return name?.split(' ').slice(0, 2).map((n) => n[0]).join('').toUpperCase() || '?';
@@ -28,7 +29,10 @@ function getAvatarColor(name: string): string {
 
 export default function SettingsPage() {
   const router = useRouter();
-  const [role, setRole] = useState('customer');
+  const [role, setRole] = useState(() => {
+    if (typeof window === 'undefined') return 'customer';
+    return localStorage.getItem('user_role') || 'customer';
+  });
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -40,12 +44,12 @@ export default function SettingsPage() {
   useEffect(() => {
     const token = localStorage.getItem('token') || localStorage.getItem('user_token');
     const userRole = localStorage.getItem('user_role') || 'customer';
-    setRole(userRole);
+    const timeout = window.setTimeout(() => setRole(userRole), 0);
 
     if (!token) { router.push('/login'); return; }
 
-    axios.get('http://localhost:5000/api/v1/users/profile', {
-      headers: { Authorization: `Bearer ${token}` },
+    axios.get(`${API_BASE}/users/profile`, {
+      headers: getAuthHeaders(),
     }).then((res) => {
       if (res.data.status === 'success') {
         const user = res.data.data.user;
@@ -57,25 +61,25 @@ export default function SettingsPage() {
         localStorage.setItem('user_id', user._id || '');
       }
     }).catch(() => {}).finally(() => setLoading(false));
-  }, []);
+    return () => window.clearTimeout(timeout);
+  }, [router]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     try {
-      const token = localStorage.getItem('token') || localStorage.getItem('user_token');
-      const res = await axios.patch('http://localhost:5000/api/v1/users/update-profile', {
+      const res = await axios.patch(`${API_BASE}/users/update-profile`, {
         name, phone, address, avatar,
       }, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: getAuthHeaders(),
       });
       if (res.data.status === 'success') {
         localStorage.setItem('user_name', name);
         if (avatar) localStorage.setItem('user_avatar', avatar);
         toast.success('تم حفظ التغييرات بنجاح');
       }
-    } catch {
-      toast.error('حدث خطأ أثناء حفظ التغييرات');
+    } catch (err: unknown) {
+      toast.error(extractTextContent(err, 'حدث خطأ أثناء حفظ التغييرات'));
     } finally {
       setSaving(false);
     }
@@ -137,8 +141,8 @@ export default function SettingsPage() {
                         showSkipCropButton: false,
                         styles: { palette: { theme: 'green' } },
                       }}
-                      onSuccess={(result: any) => {
-                        const url = result?.info?.secure_url;
+                      onSuccess={(result: { info?: string | { secure_url?: string } }) => {
+                        const url = typeof result.info === 'object' ? result.info.secure_url : undefined;
                         if (url) setAvatar(url);
                         toast.success('تم رفع الصورة بنجاح');
                       }}
