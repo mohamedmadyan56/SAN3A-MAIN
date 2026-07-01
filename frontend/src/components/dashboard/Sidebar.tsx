@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
+import { useState, useEffect } from 'react';
 
 interface NavItem {
   label: string;
@@ -14,33 +15,67 @@ interface SidebarProps {
   role: string;
 }
 
+function getInitials(name: string): string {
+  return name?.split(' ').slice(0, 2).map((n) => n[0]).join('').toUpperCase() || '?';
+}
+
+function getAvatarColor(name: string): string {
+  const colors = [
+    'from-[#0f5132] to-[#0a3822]',
+    'from-[#dc2626] to-[#991b1b]',
+    'from-[#2563eb] to-[#1e40af]',
+    'from-[#7c3aed] to-[#5b21b6]',
+    'from-[#d97706] to-[#92400e]',
+    'from-[#0891b2] to-[#155e75]',
+  ];
+  let hash = 0;
+  for (let i = 0; i < (name || '').length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colors[Math.abs(hash) % colors.length];
+}
+
 export default function Sidebar({ items, role }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const [userName, setUserName] = useState('');
+
+  useEffect(() => {
+    setUserName(localStorage.getItem('user_name') || '');
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('user_token');
     localStorage.removeItem('token');
     localStorage.removeItem('user_role');
     localStorage.removeItem('user_name');
+    setUserName('');
     toast.success('تم تسجيل الخروج بنجاح');
     router.push('/login');
   };
 
-  const roleLabel = role === 'admin' ? 'المسؤول' : role === 'craftsman' ? 'حرفي' : 'عميل';
+  const roleLabel = role === 'admin' ? 'مسؤول' : role === 'craftsman' ? 'حرفي' : 'عميل';
 
   return (
-    <aside className="w-64 bg-white border-l border-gray-200 min-h-screen flex flex-col shrink-0">
-      <div className="p-5 border-b border-gray-100">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-md bg-[#0f5132] flex items-center justify-center text-white text-sm">⌂</div>
+    <aside className="hidden md:flex flex-col w-64 bg-white border-l border-gray-200 min-h-screen shrink-0">
+      {/* البروفايل */}
+      <div className="p-6 border-b border-gray-100">
+        <Link href="/" className="flex items-center gap-2 mb-4">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#0f5132] to-[#0a3822] flex items-center justify-center text-white text-sm shadow-sm">
+            ⌂
+          </div>
           <span className="text-xl font-black text-gray-900 tracking-tight">صنعة</span>
         </Link>
-        <p className="text-xs text-gray-400 mt-2 text-right">
-          {roleLabel}
-        </p>
+        <div className="flex flex-col items-center text-center">
+          <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${getAvatarColor(userName)} flex items-center justify-center text-white text-xl font-bold shadow-sm mb-3`}>
+            {getInitials(userName)}
+          </div>
+          <h3 className="font-bold text-gray-900 text-sm">{userName || 'مستخدم'}</h3>
+          <p className="text-xs text-gray-400">{roleLabel}</p>
+        </div>
       </div>
 
+      {/* القائمة */}
       <nav className="flex-1 p-4 space-y-1">
         {items.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
@@ -61,6 +96,7 @@ export default function Sidebar({ items, role }: SidebarProps) {
         })}
       </nav>
 
+      {/* الأزرار السفلية */}
       <div className="p-4 border-t border-gray-100 space-y-2">
         <Link
           href="/"
