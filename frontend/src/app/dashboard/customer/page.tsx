@@ -41,8 +41,8 @@ export default function CustomerDashboard() {
   const statusLabel = (s: string) => {
     const map: Record<string, string> = {
       PENDING_MATCHING: 'قيد البحث عن حرفي',
-      SELECTED: 'بانتظار تأكيد الحجز',
-      ACCEPTED: 'تم قبول الطلب',
+      SELECTED: 'بانتظار موافقة الحرفي',
+      ACCEPTED: 'تم قبول الحرفي للطلب',
       ARRIVED: 'الحرفي في الطريق',
       IN_PROGRESS: 'جاري العمل',
       COMPLETED: 'مكتمل',
@@ -54,7 +54,8 @@ export default function CustomerDashboard() {
   const statusColor = (s: string) => {
     const map: Record<string, string> = {
       PENDING_MATCHING: 'bg-amber-100 text-amber-700',
-      ACCEPTED: 'bg-blue-100 text-blue-700',
+      SELECTED: 'bg-blue-100 text-blue-700',
+      ACCEPTED: 'bg-green-100 text-green-700',
       ARRIVED: 'bg-indigo-100 text-indigo-700',
       IN_PROGRESS: 'bg-purple-100 text-purple-700',
       COMPLETED: 'bg-green-100 text-green-700',

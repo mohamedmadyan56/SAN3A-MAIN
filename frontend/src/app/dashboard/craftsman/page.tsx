@@ -61,6 +61,17 @@ export default function CraftsmanDashboard() {
     } catch {}
   };
 
+  const handleCraftsmanAccept = async (id: string) => {
+    try {
+      await axios.post(`${API_BASE}/requests/${id}/accept`, {}, { headers: getAuthHeaders() });
+      setData((prev) => prev ? {
+        ...prev,
+        activeJobs: prev.activeJobs.map((j) => j._id === id ? { ...j, status: 'ACCEPTED' } : j),
+        stats: prev.stats ? { ...prev.stats } : prev.stats,
+      } : prev);
+    } catch {}
+  };
+
   const handleReject = async (id: string) => {
     try {
       await axios.post(`${API_BASE}/requests/${id}/reject`, {}, {
@@ -288,6 +299,7 @@ export default function CraftsmanDashboard() {
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                               <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-lg shadow-sm group-hover:scale-105 transition-transform ${
+                                job.status === 'SELECTED' ? 'bg-gradient-to-br from-amber-50 to-amber-100' :
                                 job.status === 'ACCEPTED' ? 'bg-gradient-to-br from-indigo-50 to-indigo-100' :
                                 job.status === 'ARRIVED' ? 'bg-gradient-to-br from-purple-50 to-purple-100' : 'bg-gradient-to-br from-green-50 to-green-100'
                               }`}>
@@ -306,12 +318,19 @@ export default function CraftsmanDashboard() {
                             </div>
                             <div className="flex items-center gap-2">
                               <span className={`text-xs font-bold px-2.5 py-1.5 rounded-full shadow-sm ${
+                                job.status === 'SELECTED' ? 'bg-amber-50 text-amber-700' :
                                 job.status === 'ACCEPTED' ? 'bg-indigo-50 text-indigo-700' :
                                 job.status === 'ARRIVED' ? 'bg-purple-50 text-purple-700' :
                                 'bg-green-50 text-green-700'
                               }`}>
                                 {statusLabel(job.status)}
                               </span>
+                              {job.status === 'SELECTED' && (
+                                <button onClick={() => handleCraftsmanAccept(job._id)}
+                                  className="bg-gradient-to-l from-[#0f5132] to-[#0a3822] text-white text-xs font-bold px-4 py-2 rounded-xl hover:shadow-lg hover:scale-[1.02] transition-all duration-200 shadow-sm">
+                                  ✅ قبول
+                                </button>
+                              )}
                               {job.status === 'ACCEPTED' && (
                                 <button onClick={() => handleStatusUpdate(job._id, 'ARRIVED')}
                                   className="bg-indigo-50 text-indigo-700 text-xs font-bold px-3 py-2 rounded-xl hover:bg-indigo-100 hover:shadow-sm transition-all duration-200">

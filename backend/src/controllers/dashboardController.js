@@ -48,7 +48,7 @@ exports.getCraftsmanDashboard = async (req, res) => {
       recentJobs,
       availableRequests,
     ] = await Promise.all([
-      Request.find({ craftsman: userId, status: { $in: ['ACCEPTED', 'ARRIVED', 'IN_PROGRESS'] } })
+      Request.find({ craftsman: userId, status: { $in: ['SELECTED', 'ACCEPTED', 'ARRIVED', 'IN_PROGRESS'] } })
         .populate('client', 'name phone')
         .populate('service', 'nameAr')
         .sort({ createdAt: -1 }),

@@ -330,9 +330,35 @@ exports.acceptRequest = async (req, res) => {
       return res.status(400).json({ status: 'fail', message: 'يرجى تحديد الفني' });
     }
 
-    const query = req.user.role === 'customer'
-      ? { _id: requestId, status: 'PENDING_MATCHING', client: req.user._id }
-      : { _id: requestId, status: 'PENDING_MATCHING' };
+    // الحرفي بيقبل طلب موجود (بعد ما العميل اختاره ودفع)
+    if (req.user.role === 'craftsman') {
+      const currentRequest = await Request.findOneAndUpdate(
+        { _id: requestId, craftsman: req.user._id, status: 'SELECTED' },
+        {
+          $set: { status: 'ACCEPTED' },
+          $push: { statusHistory: { status: 'ACCEPTED', changedAt: Date.now() } },
+        },
+        { new: true }
+      );
+
+      if (!currentRequest) {
+        return res.status(409).json({
+          status: 'fail',
+          message: 'الطلب لم يعد متاحاً'
+        });
+      }
+
+      await User.findByIdAndUpdate(req.user._id, { isAvailable: false });
+
+      return res.status(200).json({
+        status: 'success',
+        message: 'تم قبول الطلب بنجاح',
+        data: { request: currentRequest }
+      });
+    }
+
+    // العميل بيختار فني (من صفحة المطابقة)
+    const query = { _id: requestId, status: 'PENDING_MATCHING', client: req.user._id };
 
     const currentRequest = await Request.findOneAndUpdate(
       query,
@@ -358,16 +384,14 @@ exports.acceptRequest = async (req, res) => {
     let responseSeconds = null;
     if (poolEntry) {
       poolEntry.respondedAt = new Date();
-      poolEntry.response = 'ACCEPTED';
+      poolEntry.response = 'SELECTED';
       responseSeconds = Math.round((poolEntry.respondedAt - poolEntry.offeredAt) / 1000);
     }
 
     await currentRequest.save();
 
-    const craftsman = await User.findById(selectedCraftsmanId);
-
-    // تحديث متوسط سرعة الاستجابة لو كان عندنا وقت العرض الأصلي
     if (responseSeconds !== null) {
+      const craftsman = await User.findById(selectedCraftsmanId);
       await craftsman.recordResponseTime(responseSeconds);
     }
 
@@ -407,23 +431,18 @@ exports.confirmBooking = async (req, res) => {
       return res.status(400).json({ status: 'fail', message: 'يجب اختيار فني قبل تأكيد الحجز' });
     }
 
-    currentRequest.status = 'ACCEPTED';
     currentRequest.paymentMethod = normalizedPaymentMethod;
     currentRequest.isPaid = normalizedPaymentMethod === 'CARD';
     currentRequest.statusHistory.push({
-      status: 'ACCEPTED',
+      status: 'PAID',
       changedAt: Date.now(),
     });
 
     await currentRequest.save();
 
-    if (currentRequest.craftsman) {
-      await User.findByIdAndUpdate(currentRequest.craftsman, { isAvailable: false });
-    }
-
     res.status(200).json({
       status: 'success',
-      message: 'تم تأكيد الحجز بنجاح',
+      message: 'تم تأكيد الحجز بنجاح، بانتظار موافقة الحرفي',
       data: { request: currentRequest },
     });
   } catch (err) {
