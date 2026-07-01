@@ -9,6 +9,24 @@ router.post('/login', authController.login);
 router.post('/forgotPassword', authController.forgotPassword);
 router.post('/resetPassword/:token', authController.resetPassword);
 
+router.get('/public/:id', async (req, res) => {
+  try {
+    const User = require('../models/userModel');
+    const Request = require('../models/requestModel');
+    const user = await User.findById(req.params.id).select('name avatar role rating location isAvailable avgResponseTimeSeconds responseCount');
+    if (!user) {
+      return res.status(404).json({ status: 'fail', message: 'المستخدم غير موجود' });
+    }
+    const completedJobs = await Request.countDocuments({ craftsman: req.params.id, status: 'COMPLETED' });
+    res.status(200).json({
+      status: 'success',
+      data: { user, stats: { completedJobs } },
+    });
+  } catch (err) {
+    res.status(500).json({ status: 'fail', message: err.message });
+  }
+});
+
 router.get('/craftsmen', async (req, res) => {
   try {
     const User = require('../models/userModel');

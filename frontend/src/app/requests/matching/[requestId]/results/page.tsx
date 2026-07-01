@@ -289,8 +289,8 @@ export default function MatchResultsPage({ params }: ResultsPageProps) {
                         </div>
                         <div className="flex items-center gap-3">
                           <div className="text-right">
-                            <div className="flex items-center gap-2">
-                              <h4 className="font-bold text-gray-900 text-sm">{m.name}</h4>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <Link href={`/profile/${m._id}`} className="font-bold text-gray-900 text-sm hover:text-[#0f5132] transition-colors">{m.name}</Link>
                               {isConfirmed && (
                                 <span className="text-[10px] font-bold text-white bg-[#0f5132] px-2 py-0.5 rounded-full">
                                   تم الاختيار
