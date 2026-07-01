@@ -24,7 +24,9 @@ export default function Header() {
     localStorage.removeItem('token');
     localStorage.removeItem('user_role');
     localStorage.removeItem('user_name');
-    router.push('/');
+    setUserName(null);
+    setUserRole(null);
+    window.location.href = '/';
   };
 
   const isActive = (path: string) => pathname === path ? 'text-[#0f5132] font-bold border-b-2 border-[#0f5132]' : 'text-gray-600 hover:text-gray-900';
