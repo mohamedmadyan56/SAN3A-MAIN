@@ -33,7 +33,7 @@ exports.signup = async (req, res) => {
   } catch (err) {
     res.status(400).json({
       status: 'fail',
-      message: 'عذراً، حدث خطأ أثناء إنشاء الحساب',
+      message: err.message,
       error: err.message
     });
   }
