@@ -1,0 +1,23 @@
+# Dependency directories
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Next.js build output
+frontend/.next/
+frontend/out/
+
+# Production build info
+frontend/tsconfig.tsbuildinfo
+
+# Environment variables (Crucial for security)
+backend/.env
+frontend/.env
+frontend/.env.local
+
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# IDEs and editors
+.vscode/
