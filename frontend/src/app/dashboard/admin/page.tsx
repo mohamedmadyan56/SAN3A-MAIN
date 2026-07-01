@@ -1,8 +1,9 @@
 'use client';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { toast } from 'react-hot-toast';
 import Sidebar from '@/components/dashboard/Sidebar';
-import { API_BASE, getAuthHeaders } from '@/lib/api';
+import { API_BASE, extractTextContent, getAuthHeaders } from '@/lib/api';
 
 interface Stats {
   totalUsers: number;
@@ -86,7 +87,9 @@ export default function AdminDashboard() {
     if (tab === 'overview') {
       axios.get(`${API}/dashboard`, { headers: getAuthHeaders() }).then((res) => {
         if (res.data.status === 'success') setStats(res.data.data.stats);
-      }).catch(() => {}).finally(() => setLoading(false));
+      }).catch((err) => {
+        toast.error(extractTextContent(err, 'فشل تحميل الإحصائيات'));
+      }).finally(() => setLoading(false));
     }
   }, [tab]);
 
@@ -100,7 +103,9 @@ export default function AdminDashboard() {
           setUsers(res.data.data.users);
           setUserTotalPages(res.data.data.pagination.totalPages);
         }
-      }).catch(() => {}).finally(() => setLoading(false));
+      }).catch((err) => {
+        toast.error(extractTextContent(err, 'فشل تحميل المستخدمين'));
+      }).finally(() => setLoading(false));
     }
   }, [tab, userSearch, userRoleFilter, userStatusFilter, userPage]);
 
@@ -108,7 +113,9 @@ export default function AdminDashboard() {
     if (tab === 'disputes') {
       axios.get(`${API}/disputes`, { headers: getAuthHeaders() }).then((res) => {
         if (res.data.status === 'success') setDisputes(res.data.data.disputes);
-      }).catch(() => {}).finally(() => setLoading(false));
+      }).catch((err) => {
+        toast.error(extractTextContent(err, 'فشل تحميل النزاعات'));
+      }).finally(() => setLoading(false));
     }
   }, [tab]);
 
@@ -116,7 +123,9 @@ export default function AdminDashboard() {
     if (tab === 'requests') {
       axios.get(`${API}/requests`, { headers: getAuthHeaders() }).then((res) => {
         if (res.data.status === 'success') setRequests(res.data.data.requests);
-      }).catch(() => {}).finally(() => setLoading(false));
+      }).catch((err) => {
+        toast.error(extractTextContent(err, 'فشل تحميل الطلبات'));
+      }).finally(() => setLoading(false));
     }
   }, [tab]);
 

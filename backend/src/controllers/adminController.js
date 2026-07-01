@@ -93,7 +93,7 @@ exports.getUsers = async (req, res) => {
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [users, total] = await Promise.all([
-      User.find(filter).sort({ createdAt: -1 }).skip(skip).limit(parseInt(limit)),
+      User.find(filter).select('+isActive').sort({ createdAt: -1 }).skip(skip).limit(parseInt(limit)),
       User.countDocuments(filter),
     ]);
 
