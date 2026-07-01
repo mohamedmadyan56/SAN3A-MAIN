@@ -9,11 +9,15 @@ export default function Header() {
   const [userName, setUserName] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setUserName(localStorage.getItem('user_name'));
     setUserRole(localStorage.getItem('user_role'));
+    setMounted(true);
   }, []);
+
+  if (!mounted) return <header className="bg-white/80 backdrop-blur-md border-b border-gray-200/60 sticky top-0 z-50"><div className="max-w-6xl mx-auto px-4 sm:px-6"><div className="flex items-center justify-between h-16"><div className="flex items-center gap-2.5"><div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#0f5132] to-[#0a3822] flex items-center justify-center text-white text-sm shadow-sm">⌂</div><span className="text-lg font-bold text-gray-900">صنعة</span></div><div className="h-8 w-24 bg-gray-100 rounded-full animate-pulse" /></div></div></header>;
 
   const dashboardLink = userRole === 'craftsman' ? '/dashboard/craftsman' :
     userRole === 'admin' ? '/dashboard/admin' :
