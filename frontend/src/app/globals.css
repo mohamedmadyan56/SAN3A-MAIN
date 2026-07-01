@@ -1,0 +1,28 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@100;200;300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'IBM Plex Sans Arabic', sans-serif;
+}
+
+html {
+  font-family: var(--font-sans);
+}
+
+body {
+  font-weight: 350;
+  line-height: 1.7;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+}
+
+p {
+  font-weight: 300;
+  line-height: 1.8;
+}
+
+input, textarea, select, button {
+  font-family: inherit;
+}
