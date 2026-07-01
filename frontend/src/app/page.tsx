@@ -22,10 +22,10 @@ const TRUST_BADGES = [
 ];
 
 const STATS = [
-  { value: '٤.٩/٥', label: 'متوسط التقييم' },
-  { value: '+١٠ آلاف', label: 'محترف معتمد' },
-  { value: '+٥ آلاف', label: 'خدمة منجزة' },
-  { value: '٣٠ ثانية', label: 'متوسط وقت التطابق' },
+  { value: '4.9/5', label: 'متوسط التقييم' },
+  { value: '+10K', label: 'محترف معتمد' },
+  { value: '+5K', label: 'خدمة منجزة' },
+  { value: '30s', label: 'متوسط وقت التطابق' },
 ];
 
 const Map = dynamic(() => import('@/components/Map'), {
@@ -89,7 +89,7 @@ export default function LandingPage() {
               <div className="grid grid-cols-4 gap-4 border-t border-white/15 pt-6">
                 {STATS.map((s) => (
                   <div key={s.label} className="text-center">
-                    <p className="text-lg sm:text-xl font-black text-white tracking-tight">{s.value}</p>
+                    <p className="text-lg sm:text-xl font-display text-white tracking-tight leading-none">{s.value}</p>
                     <p className="text-[10px] sm:text-xs text-gray-400">{s.label}</p>
                   </div>
                 ))}
@@ -104,7 +104,7 @@ export default function LandingPage() {
                   🛡️
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-bold text-gray-900">موثق ١٠٠٪</p>
+                  <p className="text-sm font-bold text-gray-900">موثق <span className="font-display">100%</span></p>
                   <p className="text-xs text-gray-500">محترفون مفحوصون أمنياً</p>
                 </div>
               </div>
@@ -119,7 +119,11 @@ export default function LandingPage() {
           {TRUST_BADGES.map((b) => (
             <span key={b.label} className="flex items-center gap-2">
               <span className="text-[#0f5132] font-bold">{b.icon}</span>
-              {b.label}
+              {b.label === 'دعم 24/7' ? (
+                <>دعم <span className="font-display">24/7</span></>
+              ) : (
+                b.label
+              )}
             </span>
           ))}
         </div>
@@ -134,20 +138,23 @@ export default function LandingPage() {
               في ثلاث خطوات بسيطة، احصل على أفضل المحترفين لخدمة منزلك
             </p>
           </div>
-          <div className="grid sm:grid-cols-3 gap-6 sm:gap-8">
+          <div className="grid sm:grid-cols-3 gap-6 sm:gap-8 relative">
             {[
-              { step: '١', title: 'اختر الخدمة', desc: 'اختر نوع الخدمة التي تحتاجها من قائمة التخصصات المتوفرة على المنصة.', icon: '📋' },
-              { step: '٢', title: 'حدد موقعك', desc: 'أدخل عنوانك واحصل على اقتراحات فورية لأقرب المحترفين المتاحين.', icon: '📍' },
-              { step: '٣', title: 'اختر المحترف', desc: 'قارن التقييمات والمسافات واختر الأنسب لك. تأكيد الحجز يتم بنقرة واحدة.', icon: '🤝' },
-            ].map((item) => (
-              <div key={item.step} className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 sm:p-8 text-center hover:shadow-md hover:border-[#0f5132]/20 transition-all">
-                <div className="w-14 h-14 rounded-2xl bg-[#eef6ef] flex items-center justify-center text-2xl mx-auto mb-4">
+              { step: '1', title: 'اختر الخدمة', desc: 'اختر نوع الخدمة التي تحتاجها من قائمة التخصصات المتوفرة على المنصة.', icon: '📋' },
+              { step: '2', title: 'حدد موقعك', desc: 'أدخل عنوانك واحصل على اقتراحات فورية لأقرب المحترفين المتاحين.', icon: '📍' },
+              { step: '3', title: 'اختر المحترف', desc: 'قارن التقييمات والمسافات واختر الأنسب لك. تأكيد الحجز يتم بنقرة واحدة.', icon: '🤝' },
+            ].map((item, i) => (
+              <div key={item.step} className="relative bg-white rounded-3xl border border-gray-100 shadow-sm p-6 sm:p-8 text-center hover:shadow-xl hover:-translate-y-1 hover:border-[#0f5132]/30 transition-all duration-300 group">
+                {i < 2 && (
+                  <div className="hidden sm:block absolute -left-4 top-1/2 -translate-y-1/2 z-10 text-[#0f5132]/20 text-2xl">◀</div>
+                )}
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#eef6ef] to-[#dbeee0] flex items-center justify-center text-2xl mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                   {item.icon}
                 </div>
-                <div className="w-8 h-8 rounded-full bg-[#0f5132] text-white flex items-center justify-center text-xs font-bold mx-auto mb-3">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#0f5132] to-[#0a3822] text-white flex items-center justify-center font-display text-lg mx-auto mb-4 shadow-md">
                   {item.step}
                 </div>
-                <h3 className="font-bold text-gray-900 mb-2">{item.title}</h3>
+                <h3 className="font-bold text-gray-900 mb-2 text-lg">{item.title}</h3>
                 <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">{item.desc}</p>
               </div>
             ))}
@@ -165,18 +172,23 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-5">
             {SERVICES.map((s) => (
               <Link
                 key={s.name}
                 href={`/requests/new?service=${encodeURIComponent(s.name)}`}
-                className="group bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-6 flex flex-col items-center gap-3 hover:border-[#0f5132]/30 hover:shadow-md hover:-translate-y-0.5 transition-all"
+                className="group relative bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-6 flex flex-col items-center gap-3 hover:border-[#0f5132]/30 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden"
               >
-                <div className="w-14 h-14 rounded-full bg-[#f3f8f4] group-hover:bg-[#eef6ef] flex items-center justify-center text-2xl transition-colors">
+                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-l from-[#0f5132] to-[#22c55e] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#f3f8f4] to-[#eef6ef] group-hover:from-[#eef6ef] group-hover:to-[#dbeee0] flex items-center justify-center text-2xl transition-all duration-300 group-hover:scale-110 group-hover:shadow-md">
                   {s.icon}
                 </div>
-                <span className="font-bold text-gray-900 text-sm">{s.name}</span>
+                <span className="font-bold text-gray-900 text-sm group-hover:text-[#0f5132] transition-colors duration-300">{s.name}</span>
                 <span className="text-[10px] text-gray-400 text-center leading-relaxed hidden sm:block">{s.desc}</span>
+                <div className="flex items-center gap-1 text-[10px] text-[#0f5132] font-bold opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-1 group-hover:translate-y-0">
+                  <span>اطلب الخدمة</span>
+                  <span>←</span>
+                </div>
               </Link>
             ))}
           </div>
@@ -230,15 +242,15 @@ export default function LandingPage() {
             <div className="text-right">
               <h4 className="text-white font-bold mb-3 text-sm">الدعم</h4>
               <div className="space-y-2 text-xs">
-                <a href="mailto:support@san3a.com" className="block hover:text-white transition-colors">support@san3a.com</a>
-                <a href="#" className="block hover:text-white transition-colors">+٢٠ ١٠٠ ٠٠٠ ٠٠٠٠</a>
+                <a href="mailto:support@san3a.com" className="block hover:text-white transition-colors font-display tracking-wide">support@san3a.com</a>
+                <a href="#" className="block hover:text-white transition-colors font-display tracking-wide">+20 100 000 0000</a>
                 <a href="#" className="block hover:text-white transition-colors">شروط الخدمة</a>
                 <a href="#" className="block hover:text-white transition-colors">سياسة الخصوصية</a>
               </div>
             </div>
           </div>
           <div className="text-center text-xs pt-6">
-            © ٢٠٢٦ صنعة لخدمات المنازل الذكية. جميع الحقوق محفوظة.
+            © <span className="font-display">2026</span> صنعة لخدمات المنازل الذكية. جميع الحقوق محفوظة.
           </div>
         </div>
       </footer>
