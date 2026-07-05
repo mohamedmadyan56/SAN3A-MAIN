@@ -20,4 +20,4 @@ frontend/.env.local
 Thumbs.db
 
 # IDEs and editors
-.vscode/
+config.bat

@@ -216,13 +216,12 @@ exports.resetPassword = async (req, res, next) => {
     });
   }
 
-  user.password = req.body.password; //خُد الباسورد الجديد اللي المستخدم كتبه في الـ request body وحطه مكان الباسورد القديم في الـ user object.
+  user.password = req.body.password;
   user.passwordConfrim = req.body.passwordConfrim;
   user.passwordResetToken = undefined;
   user.passwordResetExpires = undefined;
   await user.save();
 
-  //2-if token has not expired and there is a user , set the new Password
-  //3- Update changePasswordAt property for user
-  //4- log the user im , send JWT
+  // بعد تغيير الباسورد بنسجّل دخول المستخدم تلقائياً
+  createSendToken(user, 200, res);
 };
