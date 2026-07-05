@@ -92,8 +92,8 @@ exports.protect = async (req, res, next) => {
       token = req.headers.authorization.split(" ")[1];
     }
     // 2) البحث في الكوكيز (للمتصفح والفرونت إيند بتاعك)
-    else if (req.cookies && req.cookies.user_token) {
-      token = req.cookies.user_token;
+    else if (req.cookies && req.cookies.token) {
+      token = req.cookies.token;
     }
 
     console.log("Token detected:", token); // عشان تطمن في التيرمنال إن التوكن مقروءة
