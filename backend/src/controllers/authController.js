@@ -10,6 +10,26 @@ const signToken = (id, role) => {
   });
 };
 
+// بتعمل التوكن وبتبعته في الـ Cookie والـ Response معاً
+const createSendToken = (user, statusCode, res) => {
+  const token = signToken(user._id, user.role);
+
+  res.cookie("token", token, {
+    expires: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), // 90 يوم
+    httpOnly: true, // الـ JS في المتصفح ميقدرش يقرأه (حماية من XSS)
+    sameSite: "lax", // حماية من CSRF
+    secure: process.env.NODE_ENV === "production", // HTTPS فقط في production
+  });
+
+  user.password = undefined;
+
+  res.status(statusCode).json({
+    status: "success",
+    token,
+    data: { user },
+  });
+};
+
 exports.signup = async (req, res) => {
   try {
     const newUser = await User.create({
