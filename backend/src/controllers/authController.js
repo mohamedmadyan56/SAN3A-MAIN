@@ -40,14 +40,7 @@ exports.signup = async (req, res) => {
       role: req.body.role,
     });
 
-    const token = signToken(newUser._id);
-    newUser.password = undefined;
-
-    res.status(201).json({
-      status: "success",
-      token,
-      data: { user: newUser },
-    });
+    createSendToken(newUser, 201, res);
   } catch (err) {
     res.status(400).json({
       status: "fail",
@@ -77,14 +70,7 @@ exports.login = async (req, res) => {
       });
     }
 
-    const token = signToken(user._id);
-    user.password = undefined;
-
-    res.status(200).json({
-      status: "success",
-      token,
-      data: { user },
-    });
+    createSendToken(user, 200, res);
   } catch (err) {
     res.status(500).json({
       status: "error",
