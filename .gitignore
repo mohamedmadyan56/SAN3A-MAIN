@@ -21,3 +21,10 @@ Thumbs.db
 
 # IDEs and editors
 .vscode/
+
+# Generated analysis reports and guides
+AUTH_PROTECTION_GUIDE.pdf
+SAN3A_CODE_ANALYSIS_REPORT.html
+SAN3A_PROJECT_PLAN.md
+SAN3A_PROJECT_PLAN.pdf
+SESSION_SUMMARY.html

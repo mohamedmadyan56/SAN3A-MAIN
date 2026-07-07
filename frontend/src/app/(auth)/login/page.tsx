@@ -1,68 +1,63 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { toast } from 'react-hot-toast';
+import React, { useState } from "react";
+import axios from "axios";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
 
 export default function LoginPage() {
   const router = useRouter();
 
-  useEffect(() => {
-    const token = localStorage.getItem('token') || localStorage.getItem('user_token');
-    if (token) router.push('/');
-  }, []);
-
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    const loginToast = toast.loading('جاري التحقق من البيانات...');
+    // تشغيل الـ Toast اللودينج الاحترافي
+    const loginToast = toast.loading("جاري التحقق من البيانات...");
 
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/v1/users/login',
-        { email, password }
+        "http://localhost:5000/api/v1/users/login",
+        { email, password },
+        {
+          withCredentials: true, // ده اللي بيخلي الكوكي يتحفظ في المتصفح
+        },
       );
 
-      if (response.data.status === 'success') {
+      if (response.data.status === "success") {
         const { token, data } = response.data;
-        const userRole = data?.user?.role || 'customer';
+        const userRole = data?.user?.role || "customer";
 
-        localStorage.setItem('user_token', token);
-        localStorage.setItem('token', token);
+        // تخزين بيانات الجلسة في المتصفح
+        localStorage.setItem("user_role", userRole);
+        localStorage.setItem("user_name", data?.user?.name || "");
 
-        localStorage.setItem('user_token', token);
-        localStorage.setItem('user_role', userRole);
-        localStorage.setItem('user_name', data?.user?.name || '');
-        const avatar = data?.user?.avatar;
-        localStorage.setItem('user_avatar', avatar && avatar !== 'default.png' ? avatar : '');
-        localStorage.setItem('user_id', data?.user?._id || '');
-
-        toast.success(`مرحبًا بعودتك يا ${data?.user?.name || ''} 🎉`, {
+        // تحويل الـ Toast لـ النجاح
+        toast.success(`مرحبًا بعودتك يا ${data?.user?.name || ""} 🎉`, {
           id: loginToast,
         });
 
+        // التوجيه الذكي للمستخدم بناءً على الـ Role
         setTimeout(() => {
-          if (userRole === 'craftsman') {
-            router.push('/dashboard/craftsman');
-          } else if (userRole === 'admin') {
-            router.push('/dashboard/admin');
+          if (userRole === "craftsman") {
+            router.push("/dashboard/craftsman");
           } else {
-            router.push('/dashboard/customer');
+            router.push("/");
           }
         }, 800);
       }
     } catch (err: any) {
+      // لقط رسالة الخطأ القادمة من الـ Backend (زي الباسورد الغلط اللي مطلع 401 في السكرين)
       const msg =
         err.response?.data?.message ||
-        'بريد إلكتروني أو كلمة مرور غير صحيحة، تأكد وحاول مجدداً';
-      
+        "بريد إلكتروني أو كلمة مرور غير صحيحة، تأكد وحاول مجدداً";
+
+      // تحويل نفس الـ Toast لـ خطأ
       toast.error(msg, {
         id: loginToast,
       });
@@ -73,10 +68,9 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex flex-row-reverse bg-white">
-
+      {/* ===== الجانب الأيمن (بنر الترحيب) ===== */}
       <div className="hidden lg:flex w-1/2 bg-gradient-to-b from-[#071C35] to-[#02111F] text-white relative">
         <div className="w-full flex flex-col justify-center px-16">
-
           <div className="absolute top-8 right-8">
             <Image
               src="/logo.png"
@@ -89,7 +83,8 @@ export default function LoginPage() {
           </div>
 
           <h1 className="text-5xl font-black leading-[1.15] tracking-tight mb-6">
-            مرحبًا بعودتك<br />
+            مرحبًا بعودتك
+            <br />
             إلى منصة صنعة
           </h1>
 
@@ -122,9 +117,10 @@ export default function LoginPage() {
         </div>
       </div>
 
+      {/* ===== الجانب الأيسر (الفورم) ===== */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
         <div className="w-full max-w-xl" dir="rtl">
-
+          {/* اللوجو فوق الفورم */}
           <div className="flex justify-center mb-8">
             <Image
               src="/logo.png"
@@ -143,8 +139,8 @@ export default function LoginPage() {
             <p className="text-gray-500">أدخل بياناتك للمتابعة</p>
           </div>
 
+          {/* الفورم */}
           <form onSubmit={handleSubmit} className="space-y-5">
-
             <div>
               <label className="block mb-2 text-gray-700 font-medium">
                 البريد الإلكتروني
@@ -178,15 +174,16 @@ export default function LoginPage() {
               disabled={isLoading}
               className="w-full bg-[#007A4D] hover:bg-[#006341] disabled:bg-gray-400 transition text-white py-4 rounded-xl text-lg font-medium"
             >
-              {isLoading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}
+              {isLoading ? "جاري تسجيل الدخول..." : "تسجيل الدخول"}
             </button>
           </form>
 
+          {/* الروابط السفلية */}
           <div className="text-center mt-8">
             <span className="text-gray-500">ليس لديك حساب؟</span>
             <button
               type="button"
-              onClick={() => router.push('/register')}
+              onClick={() => router.push("/register")}
               className="mr-2 font-black text-gray-900 hover:underline"
             >
               إنشاء حساب
@@ -197,7 +194,6 @@ export default function LoginPage() {
             <button className="text-[#007A4D] font-medium">العربية</button>
             <button className="text-gray-500">English</button>
           </div>
-
         </div>
       </div>
     </div>

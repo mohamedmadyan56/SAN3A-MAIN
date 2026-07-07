@@ -15,6 +15,7 @@
   "dependencies": {
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
@@ -24,7 +25,10 @@
     "validator": "^13.15.35"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "@types/node": "^26.1.0",
+    "nodemon": "^3.1.14",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
   },
   "engines": {
     "node": ">=16.0.0"
