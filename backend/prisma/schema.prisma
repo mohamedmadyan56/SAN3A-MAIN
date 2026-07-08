@@ -1,0 +1,100 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// 1. موديل المستخدمين (العميل والفني والآدمن)
+model User {
+  id          String  @id @default(uuid())
+  name        String
+  email       String  @unique
+  phone       String  @unique
+  password    String
+  role        String  @default("customer") // customer, craftsman, admin
+  avatar      String  @default("default.png")
+  isAvailable Boolean @default(true)
+  rating      Float   @default(4.5)
+
+  // لتهيئة الجغرافيا في Postgres بنحتاج إحداثيات منفصلة أو استخدام النوع الجغرافي عبر PostGIS لو مفعلة
+  latitude  Float?
+  longitude Float?
+  address   String?
+
+  // العلاقات (Relations)
+  clientRequests    Request[]      @relation("ClientRequests")
+  craftsmanRequests Request[]      @relation("CraftsmanRequests")
+  matchingPools     MatchingPool[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// 2. موديل الخدمات (سباكة، كهرباء...)
+model Service {
+  id       String    @id @default(uuid())
+  nameAr   String    @unique
+  nameEn   String    @unique
+  slug     String    @unique
+  icon     String
+  isActive Boolean   @default(true)
+  requests Request[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// 3. موديل الطلبات (Requests)
+model Request {
+  id String @id @default(uuid())
+
+  // علاقة العميل
+  clientId String
+  client   User   @relation("ClientRequests", fields: [clientId], references: [id])
+
+  // علاقة الفني (اختياري يبدأ null)
+  craftsmanId String?
+  craftsman   User?   @relation("CraftsmanRequests", fields: [craftsmanId], references: [id])
+
+  // علاقة الخدمة
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id])
+
+  status String @default("PENDING_MATCHING") // PENDING_MATCHING, ACCEPTED...
+
+  // تفاصيل جغرافية وسعرية
+  address     String
+  latitude    Float
+  longitude   Float
+  clientNotes String?
+
+  baseFee      Float @default(0)
+  emergencyFee Float @default(0)
+  totalAmount  Float @default(0)
+
+  matchingPool MatchingPool[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// 4. جدول وسيط للـ Matching Pool (بديل الـ Array في المونجو)
+model MatchingPool {
+  id          String  @id @default(uuid())
+  requestId   String
+  request     Request @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  craftsmanId String
+  craftsman   User    @relation(fields: [craftsmanId], references: [id], onDelete: Cascade)
+
+  response    String    @default("PENDING") // PENDING, ACCEPTED, REJECTED
+  offeredAt   DateTime  @default(now())
+  respondedAt DateTime?
+}
