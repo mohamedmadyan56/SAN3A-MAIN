@@ -107,3 +107,27 @@ exports.restrictTo = (...roles) => {
     next();
   };
 };
+
+
+exports.forgotPassword = async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({ where: { email: req.body.email } });
+    if (!user) return res.status(404).json({ status: "fail", message: "لا يوجد مستخدم بهذا البريد" });
+
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        passwordResetToken: hashedToken,
+        passwordResetExpires: new Date(Date.now() + 10 * 60 * 1000),
+      },
+    });
+
+    const resetURL = `${req.protocol}://${req.get("host")}/api/v1/users/resetPassword/${resetToken}`;
+    await sendEmail({ email: user.email, subject: "Reset Password", message: `انسخ الرابط: ${resetURL}` });
+    res.status(200).json({ status: "success", message: "تم إرسال الإيميل" });
+  } catch (err) {
+    res.status(500).json({ status: "error", message: err.message });
+  }
+};
