@@ -49,3 +49,21 @@ exports.signup = async (req,res)=>{
     })
   }
 }
+
+
+
+exports.login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ status: "fail", message: "من فضلك أدخل البريد الإلكتروني وكلمة المرور" });
+    }
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      return res.status(401).json({ status: "fail", message: "البريد الإلكتروني أو كلمة المرور غير صحيحة" });
+    }
+    createSendToken(user, 200, res);
+  } catch (err) {
+    res.status(500).json({ status: "error", message: "حدث خطأ في السيرفر الداخلي", error: err.message });
+  }
+};
