@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import { useState, useEffect } from 'react';
+import { logoutSession } from '@/lib/auth';
 
 interface NavItem {
   label: string;
@@ -51,14 +52,12 @@ export default function Sidebar({ items, role }: SidebarProps) {
     return () => window.clearTimeout(timeout);
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem('user_token');
-    localStorage.removeItem('token');
-    localStorage.removeItem('user_role');
-    localStorage.removeItem('user_name');
+  const handleLogout = async () => {
+    await logoutSession();
     setUserName('');
     toast.success('تم تسجيل الخروج بنجاح');
-    router.push('/login');
+    router.replace('/login');
+    router.refresh();
   };
 
   const roleLabel = role === 'admin' ? 'مسؤول' : role === 'craftsman' ? 'حرفي' : 'عميل';

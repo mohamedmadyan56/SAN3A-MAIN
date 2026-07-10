@@ -23,6 +23,8 @@ const createSendToken = (user, statusCode, res) => {
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000,
     ),
     httpOnly: true,
+    sameSite: "lax",
+    path: "/",
   };
 
   if (process.env.NODE_ENV === "production") cookieOptions.secure = true;
@@ -95,6 +97,25 @@ exports.login = async (req, res) => {
       error: err.message,
     });
   }
+};
+
+// ===========================
+// logout
+// ===========================
+exports.logout = (req, res) => {
+  const cookieOptions = {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+  };
+
+  if (process.env.NODE_ENV === "production") cookieOptions.secure = true;
+
+  res.clearCookie("jwt", cookieOptions);
+  res.status(200).json({
+    status: "success",
+    message: "Logged out successfully",
+  });
 };
 
 // ===========================

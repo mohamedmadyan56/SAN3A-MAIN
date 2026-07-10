@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import Sidebar from '@/components/dashboard/Sidebar';
@@ -68,10 +69,18 @@ function StatCard({ label, value, icon, color }: { label: string; value: string 
 }
 
 export default function AdminDashboard() {
-  const [tab, setTab] = useState(() => {
-    if (typeof window === 'undefined') return 'overview';
-    return new URLSearchParams(window.location.search).get('tab') || 'overview';
-  });
+  
+  //likely performs client-side navigation
+  // const [tab, setTab] = useState(() => {
+  //   if (typeof window === 'undefined') return 'overview';
+  //   return new URLSearchParams(window.location.search).get('tab') || 'overview';
+  // });
+
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const tab = searchParams.get('tab') || 'overview';
+
   const [stats, setStats] = useState<Stats | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [disputes, setDisputes] = useState<Dispute[]>([]);
@@ -151,9 +160,18 @@ export default function AdminDashboard() {
     } catch {}
   };
 
+  // const updateUrl = (newTab: string) => {
+  //   setTab(newTab);
+  //   window.history.pushState({}, '', `/dashboard/admin${newTab !== 'overview' ? `?tab=${newTab}` : ''}`);
+  // };
+
   const updateUrl = (newTab: string) => {
-    setTab(newTab);
-    window.history.pushState({}, '', `/dashboard/admin${newTab !== 'overview' ? `?tab=${newTab}` : ''}`);
+  const url =
+    newTab === 'overview'
+      ? '/dashboard/admin'
+      : `/dashboard/admin?tab=${newTab}`;
+
+    router.push(url);
   };
 
   return (
