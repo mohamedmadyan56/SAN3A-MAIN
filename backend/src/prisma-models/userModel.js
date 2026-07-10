@@ -15,7 +15,7 @@ const userModel = {
       },
     });
   },
-
+ // not secure enough there will update in next features
   findByEmail: async (email) => {
     return prisma.user.findUnique({ where: { email } });
   },
