@@ -8,16 +8,23 @@ import { useRouter } from 'next/navigation';
 export default function RegisterPage() {
   const navigate = useRouter();
 
-  useEffect(() => {
-    const token = localStorage.getItem('token') || localStorage.getItem('user_token');
-    if (token) navigate.push('/');
-  }, []);
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<'customer' | 'craftsman'>('customer');
+
+  useEffect(() => {
+    const token = localStorage.getItem('token') || localStorage.getItem('user_token');
+    if (token) {
+      navigate.replace('/');
+      return;
+    }
+
+    const requestedRole = new URLSearchParams(window.location.search).get('role');
+    if (requestedRole === 'craftsman') setRole('craftsman');
+  }, [navigate]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -32,7 +39,8 @@ export default function RegisterPage() {
     try {
       const response = await axios.post(
         'http://localhost:5000/api/v1/users/signup',
-        { name, email, phone, password, role }
+        { name, email, phone, password, role },
+        { withCredentials: true }
       );
 
       if (response.data.status === 'success') {

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { logoutSession } from '@/lib/auth';
 
 const links = [
   { href: '/requests/new', label: 'البحث عن خدمات' },
@@ -35,10 +36,11 @@ export default function Navbar() {
   const dashboardLink = userRole === 'craftsman' ? '/dashboard/craftsman' : userRole === 'admin' ? '/dashboard/admin' : '/dashboard/customer';
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
-  const logout = () => {
-    ['token', 'user_token', 'user_role', 'user_name', 'user_avatar', 'user_id'].forEach((key) => localStorage.removeItem(key));
+  const logout = async () => {
+    await logoutSession();
     setUserName(null);
-    window.location.href = '/';
+    setUserRole(null);
+    window.location.assign('/login');
   };
 
   return (

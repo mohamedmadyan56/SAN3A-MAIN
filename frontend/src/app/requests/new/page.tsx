@@ -12,6 +12,11 @@ interface IService {
   icon?: string;
 }
 
+interface ApiErrorResponse {
+  message?: string;
+}
+
+
 type TimingOption = "NOW" | "SCHEDULE";
 
 // الـ Component الخاص بالأيقونات بناءً على الـ slug الراجع من الداتا بيز
@@ -97,10 +102,21 @@ export default function NewRequestPage() {
             setSelectedServiceId(fetchedServices[0]._id);
           }
         }
-      } catch (err: any) {
+      } 
+      catch (err: unknown) {
+        if (axios.isAxiosError<ApiErrorResponse>(err)) 
+          {
+        setError(
+          err.response?.data?.message ||
+            "فشل في تحميل الخدمات من السيرفر، تأكد من تشغيل الباك إند"
+        );
+      } 
+      else 
+      {
         setError("فشل في تحميل الخدمات من السيرفر، تأكد من تشغيل الباك إند");
       }
-    };
+    }
+  };
 
     // 2️⃣ جلب عنوان وموقع العميل الحالي الافتراضي المسجل في الـ Profile
     const fetchUserProfile = async () => {
@@ -160,12 +176,19 @@ export default function NewRequestPage() {
       if (response.data.status === "success") {
         router.push(`/requests/matching/${response.data.data.request._id}`);
       }
-    } catch (err: any) {
-      setError(
-        err.response?.data?.message ||
-          "فشل في إنشاء الطلب، يرجى المحاولة مرة أخرى",
-      );
-    } finally {
+    } 
+    catch (err: unknown) 
+    {
+      if (axios.isAxiosError<ApiErrorResponse>(err)) {
+        setError(
+          err.response?.data?.message ||
+            "فشل في إنشاء الطلب، يرجى المحاولة مرة أخرى"
+        );
+      } else {
+        setError("فشل في إنشاء الطلب، يرجى المحاولة مرة أخرى");
+      }
+    }
+    finally {
       setLoading(false);
     }
   };
