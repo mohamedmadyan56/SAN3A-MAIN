@@ -285,6 +285,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 | Page | Preview |
 |------|---------|
+| **ORM Model** | ![ORM Model](./screenshots/orm.png) |
 | **Landing Page** | ![Screenshot](https://via.placeholder.com/600x400?text=Landing+Page) |
 | **Customer Dashboard** | ![Screenshot](https://via.placeholder.com/600x400?text=Customer+Dashboard) |
 | **Craftsman Dashboard** | ![Screenshot](https://via.placeholder.com/600x400?text=Craftsman+Dashboard) |

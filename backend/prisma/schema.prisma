@@ -1,0 +1,148 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CUSTOMER
+  CRAFTSMAN
+  ADMIN
+}
+
+enum RequestStatus {
+  PENDING_MATCHING
+  MATCHED
+  ON_THE_WAY
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  WALLET
+}
+
+enum MatchResponse {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+model User {
+  id                     String    @id @default(cuid())
+  name                   String
+  email                  String    @unique
+  phone                  String    @unique
+  password               String
+  role                   UserRole  @default(CUSTOMER)
+  avatar                 String?
+  isAvailable            Boolean   @default(true)
+  rating                 Float     @default(4.5)
+  avgResponseTimeSeconds Int?
+  responseCount          Int       @default(0)
+  isActive               Boolean   @default(true)
+  passwordChangedAt      DateTime?
+  passwordResetToken     String?
+  passwordResetExpires   DateTime?
+  latitude               Float     @default(30.0444)
+  longitude              Float     @default(31.2357)
+  locationAddress        String?   @map("location_address")
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  clientRequests      Request[]           @relation("ClientRequests")
+  craftsmanRequests   Request[]           @relation("CraftsmanRequests")
+  matchingPoolEntries MatchingPoolEntry[]
+
+  @@index([role])
+  @@index([isAvailable])
+  @@map("users")
+}
+
+model Service {
+  id        String   @id @default(cuid())
+  nameAr    String   @unique
+  nameEn    String   @unique
+  slug      String   @unique
+  icon      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  requests Request[]
+
+  @@map("services")
+}
+
+model MatchingPoolEntry {
+  id          String        @id @default(cuid())
+  requestId   String
+  craftsmanId String
+  offeredAt   DateTime      @default(now())
+  respondedAt DateTime?
+  response    MatchResponse @default(PENDING)
+
+  request   Request @relation("MatchingPoolEntries", fields: [requestId], references: [id], onDelete: Cascade)
+  craftsman User    @relation(fields: [craftsmanId], references: [id], onDelete: Cascade)
+
+  @@unique([requestId, craftsmanId])
+  @@index([craftsmanId])
+  @@index([response])
+  @@map("matching_pool_entries")
+}
+
+model StatusHistory {
+  id        String        @id @default(cuid())
+  requestId String
+  status    RequestStatus
+  changedAt DateTime      @default(now())
+  note      String?
+
+  request Request @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@index([requestId])
+  @@map("status_history")
+}
+
+model Request {
+  id            String        @id @default(cuid())
+  clientId      String
+  craftsmanId   String?
+  serviceId     String
+  status        RequestStatus @default(PENDING_MATCHING)
+  address       String
+  latitude      Float         @default(30.0444)
+  longitude     Float         @default(31.2357)
+  scheduledAt   DateTime      @default(now())
+  clientNotes   String?
+  baseFee       Float         @default(120)
+  emergencyFee  Float         @default(0)
+  totalAmount   Float         @default(0)
+  paymentMethod PaymentMethod @default(CASH)
+  isPaid        Boolean       @default(false)
+  arriveAt      DateTime?
+  startedAt     DateTime?
+  completedAt   DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  client              User                @relation("ClientRequests", fields: [clientId], references: [id], onDelete: Restrict)
+  craftsman           User?               @relation("CraftsmanRequests", fields: [craftsmanId], references: [id], onDelete: SetNull)
+  service             Service             @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  matchingPoolEntries MatchingPoolEntry[] @relation("MatchingPoolEntries")
+  statusHistory       StatusHistory[]
+
+  @@index([clientId])
+  @@index([craftsmanId])
+  @@index([serviceId])
+  @@index([status])
+  @@map("requests")
+}
