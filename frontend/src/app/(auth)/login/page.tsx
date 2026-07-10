@@ -34,8 +34,13 @@ export default function LoginPage() {
         const userRole = data?.user?.role || "customer";
 
         // تخزين بيانات الجلسة في المتصفح
+        localStorage.setItem("token", token);
+        localStorage.setItem("user_token", token);
         localStorage.setItem("user_role", userRole);
         localStorage.setItem("user_name", data?.user?.name || "");
+        localStorage.setItem("user_id", data?.user?._id || "");
+        const avatar = data?.user?.avatar;
+        localStorage.setItem("user_avatar", avatar && avatar !== "default.png" ? avatar : "");
 
         // تحويل الـ Toast لـ النجاح
         toast.success(`مرحبًا بعودتك يا ${data?.user?.name || ""} 🎉`, {
@@ -46,8 +51,10 @@ export default function LoginPage() {
         setTimeout(() => {
           if (userRole === "craftsman") {
             router.push("/dashboard/craftsman");
+          } else if (userRole === "admin") {
+            router.push("/dashboard/admin");
           } else {
-            router.push("/");
+            router.push("/dashboard/customer");
           }
         }, 800);
       }
