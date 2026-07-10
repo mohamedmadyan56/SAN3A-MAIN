@@ -131,3 +131,33 @@ exports.forgotPassword = async (req, res) => {
     res.status(500).json({ status: "error", message: err.message });
   }
 };
+
+
+
+exports.resetPassword = async (req, res) => {
+  try {
+    const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+    const user = await prisma.user.findFirst({
+      where: {
+        passwordResetToken: hashedToken,
+        passwordResetExpires: { gt: new Date() },
+      },
+    });
+    if (!user) return res.status(400).json({ status: "fail", message: "Token is invalid or has expired" });
+
+    const hashedPassword = await bcrypt.hash(req.body.password, 12);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        passwordResetToken: null,
+        passwordResetExpires: null,
+        passwordChangedAt: new Date(),
+      },
+    });
+    const updatedUser = await prisma.user.findUnique({ where: { id: user.id } });
+    createSendToken(updatedUser, 200, res);
+  } catch (err) {
+    res.status(500).json({ status: "error", message: err.message });
+  }
+};
