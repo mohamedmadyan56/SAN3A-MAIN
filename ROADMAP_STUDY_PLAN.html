@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>خطة تطوير وتعلم مشروع صنعة | San3a Roadmap</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --panel-light: #1f2937;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --accent: #22c55e;
+      --accent-2: #3b82f6;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --purple: #a855f7;
+      --border: #374151;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", "IBM Plex Sans Arabic", system-ui, sans-serif;
+      line-height: 1.8;
+    }
+    .container { max-width: 1050px; margin: 0 auto; padding: 24px; }
+    header {
+      text-align: center;
+      padding: 48px 24px;
+      background: linear-gradient(135deg, #111827 60%, #064e3b 100%);
+      border-bottom: 1px solid var(--border);
+      border-radius: 0 0 24px 24px;
+      margin-bottom: 32px;
+    }
+    h1 { margin: 0 0 12px; font-size: 2.4rem; }
+    h1 span { color: var(--accent); }
+    .sub { color: var(--muted); font-size: 1.1rem; max-width: 780px; margin: 0 auto; }
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin: 4px;
+      background: var(--panel-light);
+      border: 1px solid var(--border);
+    }
+    .badge.green { background: #064e3b; color: #86efac; border-color: #166534; }
+    .badge.blue { background: #1e3a8a; color: #93c5fd; border-color: #1d4ed8; }
+    .badge.yellow { background: #78350f; color: #fcd34d; border-color: #b45309; }
+    .badge.red { background: #7f1d1d; color: #fca5a5; border-color: #b91c1c; }
+    section {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 28px;
+      margin-bottom: 28px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+    h2 {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 0;
+      color: var(--accent);
+      font-size: 1.45rem;
+    }
+    h3 { color: var(--accent-2); margin-top: 24px; }
+    ul, ol { padding-right: 20px; }
+    li { margin-bottom: 8px; }
+    strong { color: #fff; }
+    .callout {
+      background: var(--panel-light);
+      border-right: 4px solid var(--accent);
+      padding: 18px;
+      border-radius: 12px;
+      margin: 18px 0;
+    }
+    .warning { border-right-color: var(--warning); background: #2a1b0a; }
+    .danger { border-right-color: var(--danger); background: #2a0f0f; }
+    .info { border-right-color: var(--accent-2); background: #0f1f3d; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 18px 0;
+      background: var(--panel-light);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 12px 14px;
+      text-align: right;
+      border-bottom: 1px solid var(--border);
+    }
+    th { background: #1e293b; color: var(--accent); }
+    tr:last-child td { border-bottom: 0; }
+    .timeline {
+      border-right: 3px solid var(--border);
+      padding-right: 24px;
+      margin-right: 10px;
+    }
+    .timeline li {
+      position: relative;
+      list-style: none;
+      padding: 16px 0;
+    }
+    .timeline li::before {
+      content: "";
+      position: absolute;
+      right: -32px;
+      top: 22px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 3px solid var(--panel);
+    }
+    .code {
+      direction: ltr;
+      text-align: left;
+      background: #000;
+      color: #4ade80;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-family: "Fira Code", monospace;
+      font-size: 0.88rem;
+      margin: 10px 0;
+      overflow-x: auto;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 768px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      h1 { font-size: 1.7rem; }
+      section { padding: 18px; }
+    }
+    a { color: var(--accent-2); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .footer { text-align: center; color: var(--muted); padding: 40px 0; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>خطة تطوير وتعلم مشروع <span>صنعة</span></h1>
+    <p class="sub">
+      دليلك العملي لترتيب أولوياتك: إيه العيوب اللي تصلحها أولاً، إيه الـ Features الجاية، وترتيب مذاكرتك بين Node.js / Next.js / TypeScript / Prisma / Nest / Design Patterns.
+    </p>
+    <div style="margin-top: 18px;">
+      <span class="badge green">Node.js</span>
+      <span class="badge blue">Next.js 16</span>
+      <span class="badge yellow">TypeScript</span>
+      <span class="badge green">Prisma</span>
+      <span class="badge blue">PostgreSQL</span>
+      <span class="badge yellow">Tailwind v4</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- قرار مهم -->
+    <section>
+      <h2>🎯 أهم قرار قبل ما تبدأ</h2>
+      <div class="callout info">
+        <strong> Nest.js دلوقتي؟ لا. </strong><br />
+        المشروع بالفعل اتحول لـ Prisma + PostgreSQL لكن نصف الكود لسه قديم Mongoose ومكسّر. لو دخلت Nest هتخسر وقت ومشروعك هيفضل معطّل. الأفضل تثبت Express/Prisma/PostgreSQL الأول وبعدها لو حابب تتوسّع لمستوى Enterprise / Microservices تذاكر Nest.
+      </div>
+      <p>
+        <strong>الترتيب المقترح:</strong>
+        <ol>
+          <li><strong>إصلاح وتثبيت الكود الحالي</strong> (Prisma + PostgreSQL كاملاً).</li>
+          <li><strong>تعمّق في Node.js Advanced + TypeScript + Prisma + Design Patterns.</strong></li>
+          <li><strong>تعمّق في Next.js App Router + Server Components + Performance.</strong></li>
+          <li><strong>بعدها</strong> ابدأ Nest.js لو محتاج بنية أكبر وفرق في production.</li>
+          <li>لو عايز Backend أقوى في مستقبل بعيد: Nest + Clean Architecture / DDD.</li>
+        </ol>
+      </p>
+    </section>
+
+    <!-- تشخيص المشروع -->
+    <section>
+      <h2>🩺 تشخيص المشروع الحالي (اللي لازم تعرفه)</h2>
+      <div class="callout danger">
+        <strong>المشروع دلوقتي "نیمی-شغال"</strong>: الـ Prisma Schema موجود، لكن controllers كتير لسه بتستورد من Mongoose <code>../models/...</code> وبالتالي كود الـ Requests / Admin / Dashboards هيعطّل.
+      </div>
+
+      <h3>أكبر المشاكل دلوقتي</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>المشكلة</th>
+            <th>الأثر</th>
+            <th>الإصلاح</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Controllers قديمة بتستدعي <code>../models/userModel.js</code> وغيرها</td>
+            <td>Crash أو errors عند معظم الـ APIs</td>
+            <td>تحويل كل Datbase access لـ Prisma Client</td>
+          </tr>
+          <tr>
+            <td><code>adminRoutes.js</code> مش مربوط في <code>app.js</code></td>
+            <td>لوحة الأدمن مش شغالة</td>
+            <td>إضافة <code>app.use('/api/v1/admin', adminRouter)</code></td>
+          </tr>
+          <tr>
+            <td>Seed script بيستخدم Mongoose schema</td>
+            <td>مش هينفع تعمل بيانات تجريبية</td>
+            <td>كتابة Seed جديد بالـ Prisma</td>
+          </tr>
+          <tr>
+            <td>RequestStatus enum في Prisma مختلف عن منطق الكود</td>
+            <td>تغيير حالات الطلب هيفشل</td>
+            <td>توحيد enum مع الكود أو تحديث الكود</td>
+          </tr>
+          <tr>
+            <td>لا يوجد Global Error Handler & Validation</td>
+            <td>Errors 500 مش واضحة ولايرد فعلا</td>
+            <td>بناء Error Middleware + Zod/Joi Validation</td>
+          </tr>
+          <tr>
+            <td>التوكن في <code>localStorage</code></td>
+            <td>معرّض لـ XSS</td>
+            <td>نقل التوكن لـ httpOnly cookie</td>
+          </tr>
+          <tr>
+            <td>إحداثيات العنوان Hardcoded في <code>requests/new/page.tsx</code></td>
+            <td>كل الطلبات من القاهرة!</td>
+            <td>ربط Map/GPS لاختيار الموقع الحقيقي</td>
+          </tr>
+          <tr>
+            <td>لا يوجد Tests / Docker / CI-CD</td>
+            <td>صعب التأكد من التعديلات وصعب الـ Deploy</td>
+            <td>إضافة Jest + Docker + GitHub Actions</td>
+          </tr>
+          <tr>
+            <td>Billing/Payment وهمي</td>
+            <td>ما فيش دفع حقيقي</td>
+            <td>ربط Paymob / Stripe / Fawry</td>
+          </tr>
+          <tr>
+            <td>لا يوجد Notifications / Real-time</td>
+            <td>الحرفي مش بيعرف بطلب جديد إلا بـ refresh</td>
+            <td>WebSocket أو Server-Sent Events أو Push</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- الخطوات الفورية -->
+    <section>
+      <h2>🚀 خطة التصليح الفورية (الأولوية القصوى — 2-4 أسابيع)</h2>
+      <p>قبل ما تذاكر أي حاجة جديدة، لازم المشروع يبقى شغال end-to-end على Prisma/PostgreSQL.</p>
+      <ol class="timeline">
+        <li><strong>أسبوع 1: استقرار الباك إند</strong>
+          <ul>
+            <li>ربط <code>app.js</code> بـ <code>adminRoutes</code>.</li>
+            <li>تحويل <code>requestController</code>, <code>adminController</code>, <code>dashboardController</code> لاستخدام <code>prisma.user</code>, <code>prisma.request</code>, إلخ.</li>
+            <li>توحيد <code>RequestStatus</code> enum مع المنطق الحقيقي.</li>
+            <li>حذف/تحديث أي import من <code>mongoose</code> أو <code>../models</code>.</li>
+          </ul>
+        </li>
+        <li><strong>أسبوع 2: Seed + Validation + Auth</strong>
+          <ul>
+            <li>كتابة <code>seed.ts</code> جديد بـ Prisma.</li>
+            <li>إضافة Zod validation على الـ Request/Auth bodies.</li>
+            <li>تثبيت الـ Auth بـ httpOnly cookies بدل localStorage.</li>
+            <li>منع تسجيل حساب <code>admin</code> من الـ signup.</li>
+          </ul>
+        </li>
+        <li><strong>أسبوع 3: ربط الفرونت إيند</strong>
+          <ul>
+            <li>حذف localStorage tokens واستخدام cookies مع axios <code>withCredentials</code>.</li>
+            <li>إصلاح إحداثيات الطلب: خريطة تفاعلية أو GPS.</li>
+            <li>توحيد الـ API base URL في <code>lib/api.ts</code>.</li>
+            <li>تفعيل middleware حقيقي للحماية.</li>
+          </ul>
+        </li>
+        <li><strong>أسبوع 4: Testing + Cleanup</strong>
+          <ul>
+            <li>إضافة 10-15 unit/integration tests على الـ Auth + Requests.</li>
+            <li>حذف الملفات الفارغة زي <code>withAuth.tsx</code>, <code>appError.js</code>, <code>catchAsync.js</code>.</li>
+            <li>حذف <code>matching_page.tsx</code> القديم.</li>
+            <li>تجربة flow كامل: عميل يطلب → حرفي يقبل → حالة → complete.</li>
+          </ul>
+        </li>
+      </ol>
+    </section>
+
+    <!-- ماذا تتعلم -->
+    <section>
+      <h2>📚 Roadmap المذاكرة (4-6 شهور)</h2>
+      <p>خطة متدرجة تعتمد على احتياج المشروع. ما تذاكرش حاجة بعيدة عن الكود اللي بتكتبه دلوقتي.</p>
+
+      <h3>Phase 1: الأساسات العملية (شهر 1-2) — أثناء إصلاح المشروع</h3>
+      <ul>
+        <li><strong>TypeScript Advanced:</strong> Generics, Utility Types, Type Guards, Mapped Types, strict mode.</li>
+        <li><strong>Node.js Advanced:</strong> Event Loop بالتفصيل، Streams, Buffers, Cluster/Worker Threads, Error Handling Patterns.</li>
+        <li><strong>Express Architecture:</strong>
+          <ul>
+            <li>Controller → Service → Repository pattern.</li>
+            <li>Dependency Injection بدون Nest (manual).</li>
+            <li>Global Error Handling, Async Wrapper, Custom Error Classes.</li>
+            <li>Rate Limiting (express-rate-limit), Helmet, CORS config.</li>
+          </ul>
+        </li>
+        <li><strong>Prisma Deep Dive:</strong>
+          <ul>
+            <li>Relations, Migrations, Raw Queries, Transactions.</li>
+            <li>Middleware & Soft Delete patterns.</li>
+            <li>Optimization: select/include, batching, connection pooling.</li>
+          </ul>
+        </li>
+        <li><strong>PostgreSQL:</strong>
+          <ul>
+            <li>Indexes (B-Tree, GIN, GiST, 2dsphere مع PostGIS).</li>
+            <li>Constraints, Foreign Keys, Transactions, Locking.</li>
+          </ul>
+        </li>
+      </ul>
+      <div class="callout info">
+        <strong>ملحوظة:</strong> وأنت بتذاكر الكلام ده، طبقه على طول في صنعة. مش "مذاكرة منفصلة" — كل Repository جديد تكتبه في البروجيكت = تعلّم.
+      </div>
+
+      <h3>Phase 2: Frontend & Next.js (شهر 2-3)</h3>
+      <ul>
+        <li>Next.js App Router بالكامل: Server Components, Client Components, Parallel Routes, Intercepting Routes.</li>
+        <li>Data Fetching: Server Actions, Route Handlers, Caching strategies, Revalidation.</li>
+        <li>React Advanced: useOptimistic, useTransition, Context + Zustand, React Query/SWR.</li>
+        <li>TypeScript في الفرونت: API Contracts, shared types بين Frontend & Backend.</li>
+        <li>Testing Frontend: Vitest/Jest + React Testing Library + Playwright.</li>
+      </ul>
+
+      <h3>Phase 3: Software Design & System Design (شهر 3-4)</h3>
+      <ul>
+        <li><strong>Design Patterns:</strong> Singleton, Factory, Strategy, Observer, Repository, Unit of Work.</li>
+        <li><strong>Architecture:</strong> Layered / Clean Architecture / Onion Architecture (على Express).</li>
+        <li><strong>System Design:</strong> Scaling horizontally, Load Balancing, Caching strategies (Redis), Message Queues (RabbitMQ/BullMQ).</li>
+        <li><strong>DevOps أساسيات:</strong> Docker, Docker Compose, CI/CD GitHub Actions, deployment على Render/Railway/VPS.</li>
+      </ul>
+
+      <h3>Phase 4: Nest.js (شهر 5-6) — <span class="badge yellow">اختياري لكن ممتاز</span></h3>
+      <ul>
+        <li>لو هتشتغل backend كبير / microservices / enterprise، Nest.js مفيد جداً.</li>
+        <li>ابدأ Nest بعد ما تكون كويس في TypeScript و DI و Design Patterns.</li>
+        <li>في مشروع صنعة الحالي: Nest مش ضروري، Express +DI manual + Prisma كافيين.</li>
+      </ul>
+
+      <h3>خطة أسبوعية مقترحة</h3>
+      <table>
+        <thead>
+          <tr><th>اليوم</th><th>المدة</th><th>النشاط</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>سبت</td><td>3-4 س</td><td>تطوير/تصليح في المشروع (أهم حاجة)</td></tr>
+          <tr><td>أحد</td><td>2-3 س</td><td>مذاكرة نظرية (TypeScript/Node/Design Pattern)</td></tr>
+          <tr><td>اثنين</td><td>3 س</td><td>تطبيق اللي اتذاكر في المشروع</td></tr>
+          <tr><td>ثلاثاء</td><td>2-3 س</td><td>Prisma/PostgreSQL + optimization</td></tr>
+          <tr><td>أربعاء</td><td>3 س</td><td>Frontend/Next.js features</td></tr>
+          <tr><td>خميس</td><td>2-3 س</td><td>Testing + Refactoring</td></tr>
+          <tr><td>جمعة</td><td>1-2 س</td><td>مراجعة + تخطيط الأسبوع الجاي</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Features جاهزة -->
+    <section>
+      <h2>🛠️ Features جاهزة للتنفيذ (مرتبة حسب الأولوية)</h2>
+      <table>
+        <thead>
+          <tr><th>الـ Feature</th><th>الوصف</th><th>التقنية</th><th>الأولوية</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Geo Location حقيقي</td>
+            <td>المستخدم يحدد موقعه على خريطة أو GPS في صفحة إنشاء الطلب</td>
+            <td>Leaflet + HTML5 Geolocation</td>
+            <td><span class="badge red">ضروري</span></td>
+          </tr>
+          <tr>
+            <td>Prisma Seed جديد</td>
+            <td>بيانات تجريبية صحيحة لكل roles و requests</td>
+            <td>Prisma Seed</td>
+            <td><span class="badge red">ضروري</span></td>
+          </tr>
+          <tr>
+            <td>httpOnly Auth</td>
+            <td>تسجيل الدخول بـ cookies مش localStorage</td>
+            <td>Cookie-parser, JWT</td>
+            <td><span class="badge red">ضروري</span></td>
+          </tr>
+          <tr>
+            <td>Input Validation</td>
+            <td>Validation على كل APIs بـ Zod</td>
+            <td>Zod</td>
+            <td><span class="badge red">ضروري</span></td>
+          </tr>
+          <tr>
+            <td>Real-time Notifications</td>
+            <td>إشعار الحرفي لما فيه طلب جديد وإشعار العميل بالحالة</td>
+            <td>Socket.io أو SSE</td>
+            <td><span class="badge yellow">مهم</span></td>
+          </tr>
+          <tr>
+            <td>Reviews & Ratings</td>
+            <td>نظام تقييم حقيقي بعد إكمال الطلب</td>
+            <td>Prisma Review model</td>
+            <td><span class="badge yellow">مهم</span></td>
+          </tr>
+          <tr>
+            <td>Payment Gateway</td>
+            <td>ربط Paymob / Stripe / Fawry للدفع</td>
+            <td>Paymob SDK / Stripe</td>
+            <td><span class="badge yellow">مهم</span></td>
+          </tr>
+          <tr>
+            <td>Craftsman Wallet</td>
+            <td>محفظة الحرفي وأرباحه وسحبها</td>
+            <td>Prisma Wallet/Transaction</td>
+            <td><span class="badge yellow">مهم</span></td>
+          </tr>
+          <tr>
+            <td>Live Tracking</td>
+            <td>تتبع موقع الحرفي على الخريطة لحظياً</td>
+            <td>Socket.io + Leaflet</td>
+            <td><span class="badge blue">متوسط</span></td>
+          </tr>
+          <tr>
+            <td>Push Notifications</td>
+            <td>إشعارات للموبايل والديسكتوب</td>
+            <td>Firebase Cloud Messaging</td>
+            <td><span class="badge blue">متوسط</span></td>
+          </tr>
+          <tr>
+            <td>Admin Analytics</td>
+            <td>رسوم بيانية لإيرادات، خرائط حرارية، تقارير</td>
+            <td>Recharts / Chart.js</td>
+            <td><span class="badge blue">متوسط</span></td>
+          </tr>
+          <tr>
+            <td>Multi-language</td>
+            <td>دعم العربي والإنجليزي كامل</td>
+            <td>next-intl</td>
+            <td><span class="badge blue">متوسط</span></td>
+          </tr>
+          <tr>
+            <td>Offline Support</td>
+            <td>تجربة أفضل على الموبايل والشبكة الضعيفة</td>
+            <td>Service Workers / PWA</td>
+            <td><span class="badge green">مستقبلي</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- نظام إدارة المهام -->
+    <section>
+      <h2>📁 نظام إدارة شغلك بعد كدا</h2>
+      <div class="callout warning">
+        <strong>قاعدة مهمة:</strong> كل feature أو bugfix يبقى Issue/Branch واحد، وتجربة الـ Flow كامل قبل ما تعمل merge.
+      </div>
+      <h3>هيكل المجلدات والـ Git workflow</h3>
+      <div class="code">
+git checkout -b fix/prisma-request-controller
+# or
+git checkout -b feature/realtime-notifications
+
+# بعد كل تعديل:
+npx prisma migrate dev --name add_reviews_table
+npm run test
+</div>
+      <h3>قائمة Issues مقترحة تفتحها على GitHub</h3>
+      <ol>
+        <li>[BUG] requestController still imports Mongoose models</li>
+        <li>[BUG] adminRoutes not mounted in app.js</li>
+        <li>[BUG] RequestStatus enum mismatch with code logic</li>
+        <li>[BUG] localStorage token storage causes XSS risk</li>
+        <li>[BUG] request coordinates hardcoded to Cairo</li>
+        <li>[TASK] Rewrite seed.ts for Prisma/PostgreSQL</li>
+        <li>[TASK] Add Zod validation to all endpoints</li>
+        <li>[TASK] Setup Jest + first auth/request tests</li>
+        <li>[FEAT] Real-time notifications with Socket.io</li>
+        <li>[FEAT] Payment integration with Paymob</li>
+        <li>[FEAT] Reviews and ratings system</li>
+        <li>[FEAT] Craftsman wallet and payout</li>
+        <li>[DEVOPS] Docker + CI/CD setup</li>
+      </ol>
+      <h3>تمبلت لكل Pull Request</h3>
+      <div class="code">
+## What
+وصف مختصر للتعديل
+
+## How to test
+1. npm run test
+2. npm run dev (backend + frontend)
+3. جرب الـ Flow: ...
+
+## Related Issue
+Closes #1
+</div>
+    </section>
+
+    <!-- متى Nest -->
+    <section>
+      <h2>🪺 متى تذاكر Nest.js فعلاً؟</h2>
+      <table>
+        <thead>
+          <tr><th>السيناريو</th><th>هل تحتاج Nest؟</th><th>بديل</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>مشروع صنعة الحالي لحد ما يكبر جداً</td>
+            <td><span class="badge red">لا</span></td>
+            <td>Express + DI manual + Prisma</td>
+          </tr>
+          <tr>
+            <td>فريق متعدد وكود كبير</td>
+            <td><span class="badge green">نعم</span></td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td>Microservices أو GraphQL أو Queues ثقيلة</td>
+            <td><span class="badge green">نعم</span></td>
+            <td>Express + libraries</td>
+          </tr>
+          <tr>
+            <td>محتاج تشتغل في شركة تستخدم Nest</td>
+            <td><span class="badge green">نعم</span></td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        <strong>خلاصة:</strong> Nest مش "لازم" ولا "أفضل" في كل حالة. هو أداة Enterprise. دلوقتي مهارتك في Design Patterns و DI و TypeScript هي اللي هتخلي Nest سهل لما تجي تذاكره.
+      </p>
+    </section>
+
+    <!-- موارد -->
+    <section>
+      <h2>📖 موارد مقترحة (مجانية أو شبه مجانية)</h2>
+      <div class="grid-2">
+        <div>
+          <h3>Node.js & Backend</h3>
+          <ul>
+            <li><a href="https://nodejs.org/en/docs">Node.js Docs</a></li>
+            <li><a href="https://expressjs.com/en/guide/error-handling.html">Express Error Handling</a></li>
+            <li><a href="https://www.prisma.io/docs">Prisma Docs</a></li>
+            <li><a href="https://www.postgresql.org/docs/">PostgreSQL Docs</a></li>
+            <li><a href="https://github.com/goldbergyoni/nodebestpractices">Node.js Best Practices</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Next.js & Frontend</h3>
+          <ul>
+            <li><a href="https://nextjs.org/docs">Next.js Docs</a></li>
+            <li><a href="https://react.dev/learn/thinking-in-react">React Docs</a></li>
+            <li><a href="https://www.totaltypescript.com/">Total TypeScript</a></li>
+            <li><a href="https://tailwindcss.com/docs">Tailwind Docs</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Design Patterns</h3>
+          <ul>
+            <li><a href="https://refactoring.guru/design-patterns">Refactoring Guru</a></li>
+            <li><a href="https://github.com/ryanmcdermott/clean-code-javascript">Clean Code JavaScript</a></li>
+            <li>كتاب Clean Architecture — Robert C. Martin</li>
+          </ul>
+        </div>
+        <div>
+          <h3>DevOps & Testing</h3>
+          <ul>
+            <li><a href="https://jestjs.io/docs/getting-started">Jest Docs</a></li>
+            <li><a href="https://docs.docker.com/get-started/">Docker Get Started</a></li>
+            <li><a href="https://docs.github.com/en/actions">GitHub Actions</a></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ملخص القرار -->
+    <section>
+      <h2>✅ ملخص خطوتك الجاية</h2>
+      <ol>
+        <li><strong>لا تدخل Nest دلوقتي.</strong> خلي المشروع شغال على Express + Prisma + PostgreSQL أولاً.</li>
+        <li><strong>ابدأ بإصلاح controller + routes + seed.</strong> ده أولوية قصوى.</li>
+        <li><strong>ذاكر TypeScript Advanced + Node Advanced + Design Patterns</strong> بالتوازي مع تطوير المشروع.</li>
+        <li><strong>بعد شهر-شهرين</strong> لو عايز أبلكيشن أكبر أو ميكروسيرفيس، افتح Nest.js.</li>
+        <li><strong>كل تعلم</strong> يتطبق في صنعة: New pattern → refactor controller. New DB concept → optimize prisma query.</li>
+      </ol>
+      <div class="callout green" style="border-right-color: var(--accent); background: #052e16;">
+        <strong>هدفك لآخر 3 شهور:</strong> مشروع صنعة شغال end-to-end، محمي، tested، ومحضّر لـ production. وبعدها تكون جاهز لـ Nest أو أي فريموورك enterprise تاني.
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    تم إنشاء هذا الملف تلقائياً لمساعدتك على تنظيم تعلمك وتطوير مشروع صنعة.<br />
+    San3a Roadmap — Node.js · Next.js · Prisma · PostgreSQL
+  </footer>
+</body>
+</html>
