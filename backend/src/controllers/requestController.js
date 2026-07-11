@@ -106,3 +106,47 @@ exports.getMatchResults = async (req, res) => {
     res.status(400).json({ status: 'fail', message: 'تعذر حساب نتائج التطابق', error: err.message });
   }
 };
+
+
+
+exports.createRequest = async (req, res) => {
+  try {
+    const { service, address, coordinates, clientNotes, paymentMethod, scheduledAt } = req.body;
+    const baseFee = 120;
+    const emergencyFee = !scheduledAt || new Date(scheduledAt) <= new Date() ? 30 : 0;
+    const totalAmount = baseFee + emergencyFee;
+
+    const newRequest = await prisma.request.create({
+      data: {
+        clientId: req.user.id, serviceId: service, address,
+        longitude: coordinates?.[0] || 31.2357, latitude: coordinates?.[1] || 30.0444,
+        clientNotes, scheduledAt: scheduledAt || new Date(), baseFee, emergencyFee, totalAmount,
+        paymentMethod: paymentMethod || 'CASH',
+        statusHistory: { create: { status: 'PENDING_MATCHING', changedAt: new Date() } },
+      },
+      include: { service: true, statusHistory: true },
+    });
+    res.status(201).json({ status: 'success', data: { request: newRequest } });
+  } catch (err) {
+    res.status(400).json({ status: 'fail', message: 'فشل في إنشاء الطلب', error: err.message });
+  }
+};
+
+// جلب طلب واحد
+exports.getRequest = async (req, res) => {
+  try {
+    const request = await prisma.request.findUnique({
+      where: { id: req.params.id },
+      include: {
+        service: true,
+        craftsman: { select: { id: true, name: true, phone: true, avatar: true, rating: true, avgResponseTimeSeconds: true, latitude: true, longitude: true } },
+        matchingPoolEntries: { include: { craftsman: { select: { id: true, name: true } } } },
+        statusHistory: { orderBy: { changedAt: 'asc' } },
+      },
+    });
+    if (!request) return res.status(404).json({ status: 'fail', message: 'الطلب غير موجود' });
+    res.status(200).json({ status: 'success', data: { request } });
+  } catch (err) {
+    res.status(400).json({ status: 'fail', message: 'تعذر جلب الطلب', error: err.message });
+  }
+};
