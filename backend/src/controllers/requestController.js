@@ -253,3 +253,24 @@ exports.updateRequestStatus = async (req, res) => {
     res.status(500).json({ status: 'error', message: err.message });
   }
 };
+
+
+
+exports.completeRequest = async (req, res) => {
+  try {
+    const { requestId } = req.params;
+    const currentRequest = await prisma.request.findUnique({ where: { id: requestId } });
+    if (!currentRequest) return res.status(404).json({ status: 'fail', message: 'طلب غير موجود' });
+    if (currentRequest.craftsmanId !== req.user.id)
+      return res.status(403).json({ status: 'fail', message: 'غير مسموح' });
+
+    await prisma.request.update({
+      where: { id: requestId },
+      data: { status: 'COMPLETED', completedAt: new Date(), statusHistory: { create: { status: 'COMPLETED', changedAt: new Date() } } },
+    });
+    await prisma.user.update({ where: { id: req.user.id }, data: { isAvailable: true } });
+    res.status(200).json({ status: 'success', message: 'تم إنهاء الطلب بنجاح!' });
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: err.message });
+  }
+};
