@@ -17,8 +17,6 @@ function normalize(value, min, max, lowerIsBetter = false) {
   ratio = Math.min(Math.max(ratio, 0), 1);
   return lowerIsBetter ? 1 - ratio : ratio;
 }
-
-
 exports.findNearbyCraftsmen = async (req, res) => {
   try {
     const request = await prisma.request.findUnique({
@@ -48,5 +46,63 @@ exports.findNearbyCraftsmen = async (req, res) => {
     res.status(200).json({ status: 'success', results: nearbyCraftsmen.length, data: { craftsmen: nearbyCraftsmen } });
   } catch (err) {
     res.status(400).json({ status: 'fail', message: 'تعذر البحث عن فنيين قريبين', error: err.message });
+  }
+};
+
+
+
+exports.getMatchResults = async (req, res) => {
+  try {
+    const currentRequest = await prisma.request.findUnique({ where: { id: req.params.requestId } });
+    if (!currentRequest) return res.status(404).json({ status: 'fail', message: 'الطلب غير موجود' });
+
+    const maxDistance = Number(req.query.radius) || MAX_SEARCH_DISTANCE_METERS;
+    const allCraftsmen = await prisma.user.findMany({
+      where: { role: 'craftsman', isAvailable: true, isActive: true },
+      select: { id: true, name: true, phone: true, avatar: true, rating: true, latitude: true, longitude: true, avgResponseTimeSeconds: true },
+    });
+
+    const craftsmenWithDistance = allCraftsmen
+      .map((c) => ({ ...c, distance: haversineDistance(currentRequest.latitude, currentRequest.longitude, c.latitude, c.longitude) }))
+      .filter((c) => c.distance <= maxDistance);
+
+    if (craftsmenWithDistance.length === 0) {
+      return res.status(200).json({ status: 'success', results: 0, data: { matches: [] } });
+    }
+
+    const historyAgg = await prisma.request.groupBy({
+      by: ['craftsmanId'],
+      where: { clientId: currentRequest.clientId, craftsmanId: { in: craftsmenWithDistance.map((c) => c.id) }, status: 'COMPLETED' },
+      _count: { id: true },
+    });
+    const historyMap = new Map(historyAgg.map((h) => [h.craftsmanId, h._count.id]));
+    const maxHistoryCount = Math.max(1, ...historyAgg.map((h) => h._count.id));
+
+    const matches = craftsmenWithDistance.map((c) => {
+      const distanceScore = normalize(c.distance, 0, maxDistance, true);
+      const ratingScore = normalize(c.rating ?? RATING_MIN, RATING_MIN, RATING_MAX, false);
+      const responseSeconds = c.avgResponseTimeSeconds ?? DEFAULT_RESPONSE_SECONDS;
+      const responseScore = normalize(responseSeconds, 0, WORST_RESPONSE_SECONDS, true);
+      const completedWithClient = historyMap.get(c.id) || 0;
+      const historyScore = completedWithClient === 0 ? 0 : normalize(completedWithClient, 0, maxHistoryCount, false);
+
+      const matchPercentage = Math.round(
+        (distanceScore * MATCH_WEIGHTS.distance + ratingScore * MATCH_WEIGHTS.rating +
+         responseScore * MATCH_WEIGHTS.responseTime + historyScore * MATCH_WEIGHTS.history) * 100
+      );
+
+      return {
+        _id: c.id, name: c.name, phone: c.phone, avatar: c.avatar, rating: c.rating,
+        distanceKm: Math.round((c.distance / 1000) * 10) / 10,
+        avgResponseTimeSeconds: c.avgResponseTimeSeconds ?? null,
+        completedWithClient, matchPercentage,
+        breakdown: { distance: Math.round(distanceScore * 100), rating: Math.round(ratingScore * 100), responseTime: Math.round(responseScore * 100), history: Math.round(historyScore * 100) },
+      };
+    });
+    matches.sort((a, b) => b.matchPercentage - a.matchPercentage);
+
+    res.status(200).json({ status: 'success', results: matches.length, data: { matches } });
+  } catch (err) {
+    res.status(400).json({ status: 'fail', message: 'تعذر حساب نتائج التطابق', error: err.message });
   }
 };
