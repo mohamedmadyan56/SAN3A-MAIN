@@ -208,3 +208,27 @@ exports.acceptRequest = async (req, res) => {
     res.status(500).json({ status: 'error', message: err.message });
   }
 };
+
+
+
+exports.rejectRequest = async (req, res) => {
+  try {
+    const { requestId } = req.params;
+    if (req.user.role !== 'craftsman')
+      return res.status(403).json({ status: 'fail', message: 'هذا الإجراء للفنيين فقط' });
+    const poolEntry = await prisma.matchingPoolEntry.findFirst({ where: { requestId, craftsmanId: req.user.id } });
+    if (!poolEntry) return res.status(400).json({ status: 'fail', message: 'لم يُعرض عليك هذا الطلب' });
+
+    const respondedAt = new Date();
+    const responseSeconds = Math.round((respondedAt - poolEntry.offeredAt) / 1000);
+    await prisma.matchingPoolEntry.update({ where: { id: poolEntry.id }, data: { respondedAt, response: 'REJECTED' } });
+
+    const craftsman = await prisma.user.findUnique({ where: { id: req.user.id } });
+    const newAvg = Math.round(((craftsman.avgResponseTimeSeconds || 0) * (craftsman.responseCount || 0) + responseSeconds) / ((craftsman.responseCount || 0) + 1));
+    await prisma.user.update({ where: { id: req.user.id }, data: { avgResponseTimeSeconds: newAvg, responseCount: (craftsman.responseCount || 0) + 1 } });
+
+    res.status(200).json({ status: 'success', message: 'تم تسجيل الرفض' });
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: err.message });
+  }
+};
