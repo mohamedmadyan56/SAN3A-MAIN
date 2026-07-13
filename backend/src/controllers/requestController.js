@@ -163,3 +163,19 @@ exports.getRequest = async (req, res) => {
     res.status(400).json({ status: 'fail', message: 'تعذر جلب الطلب', error: err.message });
   }
 };
+
+
+exports.acceptRequest = async (req,res)=>{
+  try{
+    const {requestId} = req.params;
+    const selectedCraftsmanId = req.user.role = 'CUSTOMER' ? req.body.craftsmanId : req.user.id
+
+    if(!['CRAFTSMAN','CUSTOMER'].includes(req.user.role)) return res.status(403).json({status:'fail',message:'غير مسموح'})
+      
+     if (!selectedCraftsmanId)
+      return res.status(400).json({ status: 'fail', message: 'يرجى تحديد الفني' });
+
+  
+  
+    }
+}
