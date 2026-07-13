@@ -144,3 +144,22 @@ exports.createRequest = async (req, res) => {
     res.status(400).json({ status: 'fail', message: 'فشل في إنشاء الطلب', error: err.message });
   }
 };
+
+
+exports.getRequest = async (req, res) => {
+  try {
+    const request = await prisma.request.findUnique({
+      where: { id: req.params.id },
+      include: {
+        service: true,
+        craftsman: { select: { id: true, name: true, phone: true, avatar: true, rating: true, avgResponseTimeSeconds: true, latitude: true, longitude: true } },
+        matchingPoolEntries: { include: { craftsman: { select: { id: true, name: true } } } },
+        statusHistory: { orderBy: { changedAt: 'asc' } },
+      },
+    });
+    if (!request) return res.status(404).json({ status: 'fail', message: 'الطلب غير موجود' });
+    res.status(200).json({ status: 'success', data: { request } });
+  } catch (err) {
+    res.status(400).json({ status: 'fail', message: 'تعذر جلب الطلب', error: err.message });
+  }
+};
