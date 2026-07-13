@@ -28,3 +28,7 @@ SAN3A_CODE_ANALYSIS_REPORT.html
 SAN3A_PROJECT_PLAN.md
 SAN3A_PROJECT_PLAN.pdf
 SESSION_SUMMARY.html
+
+# Documentation and PDF files
+*.md
+*.pdf
