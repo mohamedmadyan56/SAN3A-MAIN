@@ -51,6 +51,20 @@ exports.findNearbyCraftsmen = async (req, res) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 exports.getMatchResults = async (req, res) => {
   try {
     const currentRequest = await prisma.request.findUnique({ where: { id: req.params.requestId } });
@@ -108,7 +122,6 @@ exports.getMatchResults = async (req, res) => {
 };
 
 
-
 exports.createRequest = async (req, res) => {
   try {
     const { service, address, coordinates, clientNotes, paymentMethod, scheduledAt } = req.body;
@@ -129,148 +142,5 @@ exports.createRequest = async (req, res) => {
     res.status(201).json({ status: 'success', data: { request: newRequest } });
   } catch (err) {
     res.status(400).json({ status: 'fail', message: 'فشل في إنشاء الطلب', error: err.message });
-  }
-};
-
-// جلب طلب واحد
-exports.getRequest = async (req, res) => {
-  try {
-    const request = await prisma.request.findUnique({
-      where: { id: req.params.id },
-      include: {
-        service: true,
-        craftsman: { select: { id: true, name: true, phone: true, avatar: true, rating: true, avgResponseTimeSeconds: true, latitude: true, longitude: true } },
-        matchingPoolEntries: { include: { craftsman: { select: { id: true, name: true } } } },
-        statusHistory: { orderBy: { changedAt: 'asc' } },
-      },
-    });
-    if (!request) return res.status(404).json({ status: 'fail', message: 'الطلب غير موجود' });
-    res.status(200).json({ status: 'success', data: { request } });
-  } catch (err) {
-    res.status(400).json({ status: 'fail', message: 'تعذر جلب الطلب', error: err.message });
-  }
-};
-
-
-
-
-
-exports.acceptRequest = async (req, res) => {
-  try {
-    const { requestId } = req.params;
-    const selectedCraftsmanId = req.user.role === 'customer' ? req.body.craftsmanId : req.user.id;
-
-    if (!['craftsman', 'customer'].includes(req.user.role))
-      return res.status(403).json({ status: 'fail', message: 'غير مسموح' });
-    if (!selectedCraftsmanId)
-      return res.status(400).json({ status: 'fail', message: 'يرجى تحديد الفني' });
-
-    // Craftsman يقبل طلب
-    if (req.user.role === 'craftsman') {
-      const existing = await prisma.request.findFirst({ where: { id: requestId, craftsmanId: req.user.id, status: 'SELECTED' } });
-      if (!existing) return res.status(409).json({ status: 'fail', message: 'الطلب لم يعد متاحاً' });
-      const updated = await prisma.request.update({
-        where: { id: requestId },
-        data: { status: 'ACCEPTED', statusHistory: { create: { status: 'ACCEPTED', changedAt: new Date() } } },
-      });
-      await prisma.user.update({ where: { id: req.user.id }, data: { isAvailable: false } });
-      return res.status(200).json({ status: 'success', message: 'تم قبول الطلب', data: { request: updated } });
-    }
-
-    // Customer يختار فني
-    const currentRequest = await prisma.request.findFirst({ where: { id: requestId, status: 'PENDING_MATCHING', clientId: req.user.id } });
-    if (!currentRequest) return res.status(409).json({ status: 'fail', message: 'الطلب لم يعد متاحاً' });
-
-    const poolEntry = await prisma.matchingPoolEntry.findFirst({ where: { requestId, craftsmanId: selectedCraftsmanId } });
-    let responseSeconds = null;
-    if (poolEntry) {
-      const respondedAt = new Date();
-      responseSeconds = Math.round((respondedAt - poolEntry.offeredAt) / 1000);
-      await prisma.matchingPoolEntry.update({ where: { id: poolEntry.id }, data: { respondedAt, response: 'ACCEPTED' } });
-    }
-
-    await prisma.request.update({
-      where: { id: requestId },
-      data: { craftsmanId: selectedCraftsmanId, status: 'SELECTED', statusHistory: { create: { status: 'SELECTED', changedAt: new Date() } } },
-    });
-
-    if (responseSeconds !== null) {
-      const craftsman = await prisma.user.findUnique({ where: { id: selectedCraftsmanId } });
-      if (craftsman) {
-        const newAvg = Math.round(((craftsman.avgResponseTimeSeconds || 0) * (craftsman.responseCount || 0) + responseSeconds) / ((craftsman.responseCount || 0) + 1));
-        await prisma.user.update({ where: { id: selectedCraftsmanId }, data: { avgResponseTimeSeconds: newAvg, responseCount: (craftsman.responseCount || 0) + 1 } });
-      }
-    }
-
-    const updated = await prisma.request.findUnique({ where: { id: requestId } });
-    res.status(200).json({ status: 'success', message: 'تم اختيار الفني', data: { request: updated } });
-  } catch (err) {
-    res.status(500).json({ status: 'error', message: err.message });
-  }
-};
-
-
-
-exports.rejectRequest = async (req, res) => {
-  try {
-    const { requestId } = req.params;
-    if (req.user.role !== 'craftsman')
-      return res.status(403).json({ status: 'fail', message: 'هذا الإجراء للفنيين فقط' });
-    const poolEntry = await prisma.matchingPoolEntry.findFirst({ where: { requestId, craftsmanId: req.user.id } });
-    if (!poolEntry) return res.status(400).json({ status: 'fail', message: 'لم يُعرض عليك هذا الطلب' });
-
-    const respondedAt = new Date();
-    const responseSeconds = Math.round((respondedAt - poolEntry.offeredAt) / 1000);
-    await prisma.matchingPoolEntry.update({ where: { id: poolEntry.id }, data: { respondedAt, response: 'REJECTED' } });
-
-    const craftsman = await prisma.user.findUnique({ where: { id: req.user.id } });
-    const newAvg = Math.round(((craftsman.avgResponseTimeSeconds || 0) * (craftsman.responseCount || 0) + responseSeconds) / ((craftsman.responseCount || 0) + 1));
-    await prisma.user.update({ where: { id: req.user.id }, data: { avgResponseTimeSeconds: newAvg, responseCount: (craftsman.responseCount || 0) + 1 } });
-
-    res.status(200).json({ status: 'success', message: 'تم تسجيل الرفض' });
-  } catch (err) {
-    res.status(500).json({ status: 'error', message: err.message });
-  }
-};
-
-
-
-exports.updateRequestStatus = async (req, res) => {
-  try {
-    const { requestId } = req.params;
-    const { status } = req.body;
-    const currentRequest = await prisma.request.findUnique({ where: { id: requestId } });
-    if (!currentRequest) return res.status(404).json({ status: 'fail', message: 'طلب غير موجود' });
-    if (currentRequest.craftsmanId !== req.user.id)
-      return res.status(403).json({ status: 'fail', message: 'غير مسموح' });
-
-    const updated = await prisma.request.update({
-      where: { id: requestId },
-      data: { status, statusHistory: { create: { status, changedAt: new Date() } } },
-    });
-    res.status(200).json({ status: 'success', message: `تم تحديث الحالة إلى ${status}`, data: { request: updated } });
-  } catch (err) {
-    res.status(500).json({ status: 'error', message: err.message });
-  }
-};
-
-
-
-exports.completeRequest = async (req, res) => {
-  try {
-    const { requestId } = req.params;
-    const currentRequest = await prisma.request.findUnique({ where: { id: requestId } });
-    if (!currentRequest) return res.status(404).json({ status: 'fail', message: 'طلب غير موجود' });
-    if (currentRequest.craftsmanId !== req.user.id)
-      return res.status(403).json({ status: 'fail', message: 'غير مسموح' });
-
-    await prisma.request.update({
-      where: { id: requestId },
-      data: { status: 'COMPLETED', completedAt: new Date(), statusHistory: { create: { status: 'COMPLETED', changedAt: new Date() } } },
-    });
-    await prisma.user.update({ where: { id: req.user.id }, data: { isAvailable: true } });
-    res.status(200).json({ status: 'success', message: 'تم إنهاء الطلب بنجاح!' });
-  } catch (err) {
-    res.status(500).json({ status: 'error', message: err.message });
   }
 };
