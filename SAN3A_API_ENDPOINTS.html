@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SAN3A - API Endpoints</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #0f172a; color: #e2e8f0; padding: 30px; }
+    .container { max-width: 1200px; margin: auto; }
+    h1 { text-align: center; font-size: 2.5rem; margin-bottom: 10px; background: linear-gradient(135deg, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .subtitle { text-align: center; color: #94a3b8; margin-bottom: 40px; font-size: 1.1rem; }
+    .base-url { text-align: center; background: #1e293b; padding: 12px; border-radius: 12px; margin-bottom: 30px; border: 1px solid #334155; font-family: monospace; font-size: 1.1rem; color: #38bdf8; }
+    .category { background: #1e293b; border-radius: 16px; margin-bottom: 30px; overflow: hidden; border: 1px solid #334155; }
+    .category-header { background: #334155; padding: 16px 24px; font-size: 1.3rem; font-weight: bold; display: flex; align-items: center; gap: 12px; }
+    .category-header .badge { background: #0f172a; color: #94a3b8; font-size: 0.8rem; padding: 4px 12px; border-radius: 20px; }
+    .endpoint { display: flex; align-items: flex-start; padding: 16px 24px; border-bottom: 1px solid #334155; gap: 16px; transition: background 0.2s; }
+    .endpoint:hover { background: #253246; }
+    .endpoint:last-child { border-bottom: none; }
+    .method { min-width: 70px; padding: 6px 12px; border-radius: 8px; font-weight: bold; text-align: center; font-size: 0.85rem; font-family: monospace; }
+    .method.get { background: #1e3a5f; color: #60a5fa; }
+    .method.post { background: #3b2f2f; color: #f97316; }
+    .method.patch { background: #2d3748; color: #a78bfa; }
+    .method.delete { background: #3b2020; color: #f87171; }
+    .endpoint-details { flex: 1; }
+    .endpoint-path { font-family: monospace; font-size: 1rem; color: #e2e8f0; margin-bottom: 4px; word-break: break-all; }
+    .endpoint-desc { color: #94a3b8; font-size: 0.9rem; }
+    .auth-badge { font-size: 0.75rem; padding: 2px 10px; border-radius: 12px; display: inline-block; margin-top: 4px; }
+    .auth-badge.public { background: #1e3a2f; color: #4ade80; }
+    .auth-badge.protected { background: #3b2f1e; color: #fbbf24; }
+    .auth-badge.admin { background: #3b1e2f; color: #f472b6; }
+    @media (max-width: 768px) { body { padding: 15px; } .endpoint { flex-direction: column; gap: 8px; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧰 SAN3A API Endpoints</h1>
+    <p class="subtitle">جميع نقاط API الخاصة بمنصة صنعة - جاهزة للاختبار في Postman</p>
+    <div class="base-url">🔗 Base URL: <strong>http://localhost:5000/api/v1</strong></div>
+
+    <!-- Users -->
+    <div class="category">
+      <div class="category-header">👤 المستخدمون <span class="badge">6 endpoints</span></div>
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <div class="endpoint-details">
+          <div class="endpoint-path">/users/signup</div>
+          <div class="endpoint-desc">تسجيل مستخدم جديد</div>
+          <span class="auth-badge public">Public</span>
+          <pre style="margin-top:6px;background:#0f172a;padding:8px;border-radius:8px;font-size:0.8rem;color:#94a3b8;">{ "name": "...", "email": "...", "phone": "...", "password": "...", "role": "customer|craftsman" }</pre>
+        </div>
+      </div>
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <div class="endpoint-details">
+          <div class="endpoint-path">/users/login</div>
+          <div class="endpoint-desc">تسجيل الدخول</div>
+          <span class="auth-badge public">Public</span>
+          <pre style="margin-top:6px;background:#0f172a;padding:8px;border-radius:8px;font-size:0.8rem;color:#94a3b8;">{ "email": "...", "password": "..." }</pre>
+        </div>
+      </div>
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <div class="endpoint-details">
+          <div class="endpoint-path">/users/forgotPassword</div>
+          <div class="endpoint-desc">نسيت كلمة المرور - إرسال رابط إعادة التعيين</div>
+          <span class="auth-badge public">Public</span>
+          <pre style="margin-top:6px;background:#0f172a;padding:8px;border-radius:8px;font-size:0.8rem;color:#94a3b8;">{ "email": "..." }</pre>
+        </div>
+      </div>
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <div class="endpoint-details">
+          <div class="endpoint-path">/users/resetPassword/:token</div>
+          <div class="endpoint-desc">إعادة تعيين كلمة المرور باستخدام التوكن</div>
+          <span class="auth-badge public">Public</span>
+          <pre style="margin-top:6px;background:#0f172a;padding:8px;border-radius:8px;font-size:0.8rem;color:#94a3b8;">{ "password": "..." }</pre>
+        </div>
+      </div>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <div class="endpoint-details">
+          <div class="endpoint-path">/users/public/:id</div>
+          <div class="endpoint-desc">عرض الملف العام لمستخدم</div>
+          <span class="auth-badge public">Public</span>
+        </div>
+      </div>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <div class="endpoint-details">
+          <div class="endpoint-path">/users/craftsmen</div>
+          <div class="endpoint-desc">عرض جميع الحرفيين</div>
+          <span class="auth-badge public">Public</span>
+        </div>
+      </div>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <div class="endpoint-details">
+          <div class="endpoint-path">/users/profile</div>
+          <div class="endpoint-desc">عرض البروفايل الخاص بي</div>
+          <span class="auth-badge protected">Protected</span>
+          <div style="margin-top:4px;font-size:0.75rem;color:#64748b;">Header: Authorization: Bearer &lt;token&gt;</div>
+        </div>
+      </div>
+      <div class="endpoint">
+        <span class="method patch">PATCH</span>
+        <div class="endpoint-details">
+          <div class="endpoint-path">/users/update-profile</div>
+          <div class="endpoint-desc">تحديث الملف الشخصي</div>
+          <span class="auth-badge protected">Protected</span>
+          <pre style="margin-top:6px;background:#0f172a;padding:8px;border-radius:8px;font-size:0.8rem;color:#94a3b8;">{ "name": "...", "phone": "...", "address": "...", "avatar": "..." }</pre>
+        </div>
+      </div>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <div class="endpoint-details">
+          <div class="endpoint-path">/users/dashboard/customer</div>
+          <div class="endpoint-desc">لوحة تحكم العميل</div>
+          <span class="auth-badge protected">Protected (customer/admin)</span>
+        </div>
+      </div>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <div class="endpoint-details">
+          <div class="endpoint-path">/users/dashboard/craftsman</div>
+          <div class="endpoint-desc">لوحة تحكم الحرفي</div>
+          <span class="auth-badge protected">Protected (craftsman/admin)</span>
+        </div>
+      </div>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <div class="endpoint-details">
+          <div class="endpoint-path">/users/admin-dashboard</div>
+          <div class="endpoint-desc">ترحيب الأدمن بلوحة التحكم</div>
+          <span class="auth-badge admin">Admin</span>
+        </div>
+      </div>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <div class="endpoint-details">
+          <div class="endpoint-path">/users/craftsman-orders</div>
+          <div class="endpoint-desc">الطلبات المتاحة للحرفي</div>
+          <span class="auth-badge protected">Protected (craftsman/admin)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Services -->
+    <div class="category">
+      <div class="category-header">🔧 الخدمات <span class="badge">2 endpoints</span></div>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <div class="endpoint-details">
+          <div class="endpoint-path">/services</div>
+          <div class="endpoint-desc">عرض جميع الخدمات النشطة</div>
+          <span class="auth-badge public">Public</span>
+        </div>
+      </div>
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <div class="endpoint-details">
+          <div class="endpoint-path">/services</div>
+          <div class="endpoint-desc">إنشاء خدمة جديدة</div>
+          <span class="auth-badge public">Public</span>
+          <pre style="margin-top:6px;background:#0f172a;padding:8px;border-radius:8px;font-size:0.8rem;color:#94a3b8;">{ "nameAr": "...", "nameEn": "...", "slug": "...", "icon": "..." }</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Requests -->
+    <div class="category">
+      <div class="category-header">📋 الطلبات <span class="badge">8 endpoints</span></div>
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <div class="endpoint-details">
+          <div class="endpoint-path">/requests</div>
+          <div class="endpoint-desc">إنشاء طلب جديد</div>
+          <span class="auth-badge protected">Protected</span>
+          <pre style="margin-top:6px;background:#0f172a;padding:8px;border-radius:8px;font-size:0.8rem;color:#94a3b8;">{ "service": "serviceId", "address": "...", "coordinates": [lng, lat], "clientNotes": "...", "paymentMethod": "CASH|CARD|WALLET", "scheduledAt": "ISO date" }</pre>
+        </div>
+      </div>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <div class="endpoint-details">
+          <div class="endpoint-path">/requests/:id</div>
+          <div class="endpoint-desc">عرض طلب معين</div>
+          <span class="auth-badge protected">Protected</span>
+        </div>
+      </div>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <div class="endpoint-details">
+          <div class="endpoint-path">/requests/:requestId/nearby-craftsmen</div>
+          <div class="endpoint-desc">البحث عن فنيين قريبين (Query: ?radius=5000)</div>
+          <span class="auth-badge protected">Protected</span>
+        </div>
+      </div>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <div class="endpoint-details">
+          <div class="endpoint-path">/requests/:requestId/match-results</div>
+          <div class="endpoint-desc">نتائج التطابق مع الحرفيين (Query: ?radius=10000)</div>
+          <span class="auth-badge protected">Protected</span>
+        </div>
+      </div>
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <div class="endpoint-details">
+          <div class="endpoint-path">/requests/:requestId/accept</div>
+          <div class="endpoint-desc">قبول طلب (حرفي: بدون body) / اختيار فني (عميل: body.craftsmanId)</div>
+          <span class="auth-badge protected">Protected</span>
+          <pre style="margin-top:6px;background:#0f172a;padding:8px;border-radius:8px;font-size:0.8rem;color:#94a3b8;">{ "craftsmanId": "..." } ← للعميل فقط</pre>
+        </div>
+      </div>
+      <div class="endpoint">
+        <span class="method post">POST</span>
+        <div class="endpoint-details">
+          <div class="endpoint-path">/requests/:requestId/reject</div>
+          <div class="endpoint-desc">رفض طلب (للفني فقط)</div>
+          <span class="auth-badge protected">Protected (craftsman)</span>
+        </div>
+      </div>
+      <div class="endpoint">
+        <span class="method patch">PATCH</span>
+        <div class="endpoint-details">
+          <div class="endpoint-path">/requests/:requestId/status</div>
+          <div class="endpoint-desc">تحديث حالة الطلب (للفني فقط)</div>
+          <span class="auth-badge protected">Protected (craftsman)</span>
+          <pre style="margin-top:6px;background:#0f172a;padding:8px;border-radius:8px;font-size:0.8rem;color:#94a3b8;">{ "status": "ON_THE_WAY|ARRIVED|IN_PROGRESS" }</pre>
+        </div>
+      </div>
+      <div class="endpoint">
+        <span class="method patch">PATCH</span>
+        <div class="endpoint-details">
+          <div class="endpoint-path">/requests/:requestId/complete</div>
+          <div class="endpoint-desc">إنهاء الطلب (للفني فقط)</div>
+          <span class="auth-badge protected">Protected (craftsman)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin -->
+    <div class="category">
+      <div class="category-header">⚙️ الأدمن <span class="badge">8 endpoints</span></div>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <div class="endpoint-details">
+          <div class="endpoint-path">/admin/dashboard</div>
+          <div class="endpoint-desc">إحصائيات لوحة تحكم الأدمن</div>
+          <span class="auth-badge admin">Admin</span>
+        </div>
+      </div>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <div class="endpoint-details">
+          <div class="endpoint-path">/admin/users</div>
+          <div class="endpoint-desc">عرض المستخدمين (Query: ?search=&amp;role=&amp;status=&amp;page=&amp;limit=)</div>
+          <span class="auth-badge admin">Admin</span>
+        </div>
+      </div>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <div class="endpoint-details">
+          <div class="endpoint-path">/admin/users/:id</div>
+          <div class="endpoint-desc">عرض مستخدم معين</div>
+          <span class="auth-badge admin">Admin</span>
+        </div>
+      </div>
+      <div class="endpoint">
+        <span class="method patch">PATCH</span>
+        <div class="endpoint-details">
+          <div class="endpoint-path">/admin/users/:id</div>
+          <div class="endpoint-desc">تحديث مستخدم</div>
+          <span class="auth-badge admin">Admin</span>
+          <pre style="margin-top:6px;background:#0f172a;padding:8px;border-radius:8px;font-size:0.8rem;color:#94a3b8;">{ "name": "...", "email": "...", "phone": "...", "role": "...", "isActive": true, "isAvailable": true }</pre>
+        </div>
+      </div>
+      <div class="endpoint">
+        <span class="method delete">DELETE</span>
+        <div class="endpoint-details">
+          <div class="endpoint-path">/admin/users/:id</div>
+          <div class="endpoint-desc">تعطيل مستخدم (soft delete)</div>
+          <span class="auth-badge admin">Admin</span>
+        </div>
+      </div>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <div class="endpoint-details">
+          <div class="endpoint-path">/admin/requests</div>
+          <div class="endpoint-desc">عرض جميع الطلبات (Query: ?status=&amp;page=&amp;limit=)</div>
+          <span class="auth-badge admin">Admin</span>
+        </div>
+      </div>
+      <div class="endpoint">
+        <span class="method get">GET</span>
+        <div class="endpoint-details">
+          <div class="endpoint-path">/admin/disputes</div>
+          <div class="endpoint-desc">عرض النزاعات</div>
+          <span class="auth-badge admin">Admin</span>
+        </div>
+      </div>
+      <div class="endpoint">
+        <span class="method patch">PATCH</span>
+        <div class="endpoint-details">
+          <div class="endpoint-path">/admin/disputes/:id/resolve</div>
+          <div class="endpoint-desc">حل نزاع (resolution: "refund" أو "complete")</div>
+          <span class="auth-badge admin">Admin</span>
+          <pre style="margin-top:6px;background:#0f172a;padding:8px;border-radius:8px;font-size:0.8rem;color:#94a3b8;">{ "resolution": "refund|complete", "note": "..." }</pre>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:40px;padding:20px;background:#1e293b;border-radius:12px;border:1px solid #334155;">
+      <p style="color:#94a3b8;">📌 جميع الطلبات المحمية تحتاج إلى Header: <code style="background:#0f172a;padding:4px 8px;border-radius:6px;color:#38bdf8;">Authorization: Bearer &lt;jwt_token&gt;</code></p>
+      <p style="color:#94a3b8;margin-top:8px;">🔄 الـ token يتم إرجاعه بعد تسجيل الدخول أو إنشاء الحساب</p>
+    </div>
+  </div>
+</body>
+</html>
