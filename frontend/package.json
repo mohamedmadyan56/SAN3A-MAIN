@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "NODE_OPTIONS='--max-old-space-size=4096' next dev",
-    "dev:turbo": "NODE_OPTIONS='--max-old-space-size=4096' next dev --turbopack",
-    "build": "next build",
-    "start": "next start",
+    "dev": "node init && NODE_OPTIONS='--max-old-space-size=4096' next dev",
+    "dev:turbo": "node init && NODE_OPTIONS='--max-old-space-size=4096' next dev --turbopack",
+    "build": "node init && next build",
+    "start": "node init && next start",
     "lint": "eslint"
   },
   "dependencies": {
