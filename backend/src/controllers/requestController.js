@@ -218,3 +218,17 @@ exports.acceptRequest = async (req, res) => {
     res.status(500).json({ status: 'error', message: err.message });
   }
 };
+
+
+exports.confirmBooking = async (req,res)=>{
+  try{
+    const {requestId} = req.params;
+    const { paymentMethod } = req.body;
+        const currentRequest = await prisma.request.findUnique({ where: { id: requestId } });
+
+        if (!currentRequest) return res.status(404).json({
+          status:'fail',
+          message:'طلب غير موجود'
+        })
+  }
+}
