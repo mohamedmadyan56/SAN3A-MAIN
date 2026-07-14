@@ -5,6 +5,7 @@ const cookieParser = require("cookie-parser");
 const userRouter = require("./src/routes/userRoutes");
 const serviceRouter = require("./src/routes/serviceRoutes");
 const requestRouter = require("./src/routes/requestRoutes");
+const globalErrorHandler = require("./src/middleware/errorHandler");
 
 const app = express();
 
@@ -30,11 +31,14 @@ app.get("/", (req, res) => {
   res.send("server is working ....");
 });
 
-app.use((req, res) => {
-  res.status(404).json({
-    status: "fail",
-    message: `Can't find ${req.originalUrl} on this server!`,
-  });
-});
+app.all((req, res,next) => {
+  const err = new Error(`Can't find ${req.originalUrl} on this server!`);
+err.statusCode = 404;
+  err.status = "fail";
+  err.isOperational = true;
+  next(err);
 
+
+});
+app.use(globalErrorHandler);
 module.exports = app;
