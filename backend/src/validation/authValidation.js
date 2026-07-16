@@ -54,3 +54,27 @@ exports.loginSchema = Joi.object({
     'any.required': 'كلمة السر مطلوبة',
   }),
 });
+// ---------- Forgot Password ----------
+exports.forgotPasswordSchema = Joi.object({
+  email: Joi.string()
+    .email()
+    .required()
+    .messages({
+      'string.email': 'البريد الإلكتروني غير صالح',
+      'string.empty': 'البريد الإلكتروني مطلوب',
+      'any.required': 'البريد الإلكتروني مطلوب',
+    }),
+});
+
+
+// ---------- Reset Password ----------
+exports.resetPasswordSchema = Joi.object({
+  password: Joi.string()
+    .min(8)
+    .required()
+    .messages({
+      'string.min': 'كلمة السر لازم تكون 8 أحرف على الأقل',
+      'string.empty': 'كلمة السر مطلوبة',
+      'any.required': 'كلمة السر مطلوبة',
+    }),
+});
