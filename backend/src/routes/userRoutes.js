@@ -1,13 +1,15 @@
 const express = require('express');
 const authController = require('../controllers/authController');
 const dashboardController = require('../controllers/dashboardController');
+const { validate } = require('../middleware/validationMiddleware');
+const authValidation = require('../validation/authValidation');
 
 const router = express.Router();
 
-router.post('/signup', authController.signup);
-router.post('/login', authController.login);
-router.post('/forgotPassword', authController.forgotPassword);
-router.post('/resetPassword/:token', authController.resetPassword);
+router.post('/signup', validate(authValidation.signupSchema),authController.signup);
+router.post('/login', validate(authValidation.loginSchema),authController.login);
+router.post('/forgotPassword',  validate(authValidation.forgotPasswordSchema),authController.forgotPassword);
+router.post('/resetPassword/:token',   validate(authValidation.resetPasswordSchema),authController.resetPassword);
 
 router.get('/public/:id', async (req, res) => {
   try {
